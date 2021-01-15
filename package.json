@@ -1,0 +1,13 @@
+{
+  "name": "eth-copy-trader",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Marcello Bardus <marcellobardus8@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^2.2.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.3",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
+  }
+}
