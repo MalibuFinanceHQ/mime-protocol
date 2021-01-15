@@ -7,7 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "start": "npx node src/index.ts",
+    "compile": "tsc",
+    "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
