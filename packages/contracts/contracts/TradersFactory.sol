@@ -32,7 +32,6 @@ contract TradersFactory is ITradersFactory {
 
         for (uint256 i = 0; i < relayPoolCharges_.length; i++) {
             _chargePool(address(trader_), _chargedEther, relayPoolCharges_[i]);
-            _chargedEther = _chargedEther.add(relayPoolCharges_[i].asset);
         }
         for (uint256 i = 0; i < operationsPoolCharges_.length; i++) {
             _chargePool(
@@ -40,7 +39,10 @@ contract TradersFactory is ITradersFactory {
                 _chargedEther,
                 operationsPoolCharges_[i]
             );
-            _chargedEther = _chargedEther.add(operationsPoolCharges_[i].asset);
+        }
+
+        if (_chargedEther != 0) {
+            payable(address(trader_)).transfer(_chargedEther);
         }
 
         Ownable(address(trader_)).transferOwnership(msg.sender);
@@ -57,12 +59,15 @@ contract TradersFactory is ITradersFactory {
     function _chargePool(
         address copyTraderContract_,
         uint256 alreadyChargedEther_,
-        ICopyTrader.PoolCharge poolCharge_
+        ICopyTrader.PoolCharge memory poolCharge_
     ) internal {
         if (poolCharge_.asset == address(0)) {
             require(
-                "TradersFactory:_chargePool, ether failed",
-                msg.value == poolCharge_.value.add(alreadyChargedEther_)
+                msg.value == poolCharge_.value.add(alreadyChargedEther_),
+                "TradersFactory:_chargePool, ether failed"
+            );
+            alreadyChargedEther_ = alreadyChargedEther_.add(
+                alreadyChargedEther_
             );
         } else {
             require(
