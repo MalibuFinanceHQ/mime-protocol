@@ -23,7 +23,6 @@ contract CopyTrader is ICopyTrader, Ownable {
         PoolCharge[] memory relayPool_
     ) payable Ownable() {
         _follow(initialFollowedTrader_);
-
         _setTradingStrategy(tradingStrategy_);
     }
 
