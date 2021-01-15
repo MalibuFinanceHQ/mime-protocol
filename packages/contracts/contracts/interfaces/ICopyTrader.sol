@@ -25,6 +25,15 @@ interface ICopyTrader {
     );
 
     /**
+     * @dev used as arg when a certain pool is charged,
+     * instead of passing address[] and uint[] an array of PoolCharge[] will be used to simplify.
+     */
+    struct PoolCharge {
+        address asset;
+        uint256 value;
+    }
+
+    /**
      * @dev allows to change the followed address.
      * @notice must be called only by the contract owner.
      */

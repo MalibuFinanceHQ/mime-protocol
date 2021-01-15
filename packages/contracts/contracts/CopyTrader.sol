@@ -1,4 +1,5 @@
 pragma solidity 0.7.5;
+pragma abicoder v2;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/access/Ownable.sol";
@@ -18,33 +19,10 @@ contract CopyTrader is ICopyTrader, Ownable {
     constructor(
         address initialFollowedTrader_,
         ITradingStrategy tradingStrategy_,
-        address[] memory initialTxRelayersRewardsPoolsAssets_,
-        uint256[] memory initialTxRelayersRewardsPoolsAmounts_,
-        address[] memory initialRecipientsWhitelist_
+        PoolCharge[] memory operationsPool_,
+        PoolCharge[] memory relayPool_
     ) payable Ownable() {
         _follow(initialFollowedTrader_);
-
-        require(
-            initialTxRelayersRewardsPoolsAssets_.length ==
-                initialTxRelayersRewardsPoolsAmounts_.length,
-            "Invalid relay pools args"
-        );
-
-        for (
-            uint256 i = 0;
-            i < initialTxRelayersRewardsPoolsAmounts_.length;
-            i++
-        ) {
-            _chargeRelayPool(
-                msg.sender,
-                initialTxRelayersRewardsPoolsAssets_[i],
-                initialTxRelayersRewardsPoolsAmounts_[i]
-            );
-        }
-
-        for (uint256 i = 0; i < initialRecipientsWhitelist_.length; i++) {
-            _whitelist(initialRecipientsWhitelist_[i]);
-        }
 
         _setTradingStrategy(tradingStrategy_);
     }
