@@ -174,6 +174,8 @@ contract CopyTrader is ICopyTrader, Ownable {
         }
 
         require(result, "CopyTrader:_relay, execution failed ");
+
+        // TODO refund the tx
     }
 
     /// ===== GETTERS ===== ///

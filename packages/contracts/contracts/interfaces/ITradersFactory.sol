@@ -5,6 +5,7 @@ pragma abicoder v2;
 
 import "./ICopyTrader.sol";
 
+// TODO consider to make some params indexed.
 interface ITradersFactory {
     event TraderCreated(
         address onContract,
