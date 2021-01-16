@@ -11,13 +11,5 @@ export function parseCopyTraderCreationFromFactory(
     onContract: event.onContract,
     strategy: event.strategy,
     observedAddress: event.observedAddress,
-    relayPoolCharges: event.relayPoolCharges.map((charge) => ({
-      asset: charge.asset,
-      value: charge.value.toHexString(),
-    })),
-    operationsPoolCharges: event.operationsPoolCharges.map((charge) => ({
-      asset: charge.asset,
-      value: charge.value.toHexString(),
-    })),
   };
 }

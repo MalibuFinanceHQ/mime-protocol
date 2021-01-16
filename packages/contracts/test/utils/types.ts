@@ -1,15 +1,12 @@
-import { BigNumberish } from 'ethers/utils';
-import { type } from 'os';
+import { BigNumberish } from 'ethers';
 
-export type CopyTraderPoolChargeStruct = {
+export interface CopyTraderPoolChargeStruct {
   asset: string;
   value: BigNumberish;
-};
+}
 
 export type TradersFactoryTraderCreatedEvent = {
   onContract: string;
   strategy: string;
   observedAddress: string;
-  relayPoolCharges: CopyTraderPoolChargeStruct[];
-  operationsPoolCharges: CopyTraderPoolChargeStruct[];
 };

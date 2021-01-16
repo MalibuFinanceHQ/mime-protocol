@@ -9,8 +9,6 @@ interface ITradersFactory {
     event TraderCreated(
         address onContract,
         address strategy,
-        address observedAddress,
-        ICopyTrader.PoolCharge[] relayPoolCharges,
-        ICopyTrader.PoolCharge[] operationsPoolCharges
+        address observedAddress
     );
 }

@@ -20,20 +20,18 @@ contract CopyTrader is ICopyTrader, Ownable {
 
     constructor(
         address initialFollowedTrader_,
-        ITradingStrategy tradingStrategy_,
-        PoolCharge[] memory operationsPool_,
-        PoolCharge[] memory relayPool_
-    ) payable Ownable() {
+        ITradingStrategy tradingStrategy_
+    ) Ownable() {
         _follow(initialFollowedTrader_);
         _setTradingStrategy(tradingStrategy_);
     }
 
-    ITradingStrategy tradingStrategy;
+    ITradingStrategy public tradingStrategy;
 
     /**
      * @dev address which's transactions are to be copied.
      */
-    address followedTrader;
+    address public followedTrader;
 
     /**
      * @dev map(protocol => interactionAllowed).
@@ -46,16 +44,17 @@ contract CopyTrader is ICopyTrader, Ownable {
      */
     mapping(address => uint256) relayPools;
 
+    /**
+     * @dev map(poolAsset => poolSize).
+     * This mapping contains the amount of some tokens locked, in order to execute txns.
+     */
+    mapping(address => uint256) operationsPools;
+
     /// ===== EXTERNAL STATE CHANGERS ===== ///
 
     /// @inheritdoc ICopyTrader
     function follow(address trader_) external override onlyOwner {
         _follow(trader_);
-    }
-
-    /// @inheritdoc ICopyTrader
-    function whitelist(address recipient_) external override onlyOwner {
-        _whitelist(recipient_);
     }
 
     /// @inheritdoc ICopyTrader
@@ -67,14 +66,18 @@ contract CopyTrader is ICopyTrader, Ownable {
         _setTradingStrategy(strategy_);
     }
 
-    // TODO
     function relay(address recipient_, bytes calldata abiEncodedCall_)
         external
     {
         bytes4 methodSignature =
             ABIParserLib.extractMethodSignature(abiEncodedCall_);
+    }
 
-        console.logBytes4(methodSignature);
+    function chargePools(
+        PoolCharge[] calldata charges_,
+        Pool[] calldata chargedPools_
+    ) external payable {
+        _handleMultipleCharges(charges_, chargedPools_);
     }
 
     /// ===== INTERNAL STATE CHANGERS ===== ///
@@ -84,30 +87,45 @@ contract CopyTrader is ICopyTrader, Ownable {
         followedTrader = trader_;
     }
 
-    function _whitelist(address recipient_) internal {
-        recipientsWhitelist[recipient_] = true;
-        emit RecipientWhitelisted(recipient_);
+    function _chargeRelayPool(PoolCharge memory charge_) internal {
+        relayPools[charge_.asset] = relayPools[charge_.asset].add(
+            charge_.value
+        );
+
+        emit RelayPoolCharged(charge_);
     }
 
-    function _chargeRelayPool(
-        address chargedBy_,
-        address pool_,
-        uint256 amount_
-    ) internal {
-        relayPools[pool_] = relayPools[pool_].add(amount_);
+    function _chargeOperationsPool(PoolCharge memory charge_) internal {
+        operationsPools[charge_.asset] = operationsPools[charge_.asset].add(
+            charge_.value
+        );
 
-        if (pool_ != address(0)) {
-            require(
-                IERC20(pool_).transferFrom(chargedBy_, address(this), amount_),
-                "CopyTrader:_chargeRelayPool, relay pool charge failed"
-            );
-        } else {
-            require(
-                msg.value == amount_,
-                "CopyTrader:_chargeRelayPool, relay pool charge failed"
-            );
+        emit OperationsPoolCharged(charge_);
+    }
+
+    function _handleMultipleCharges(
+        PoolCharge[] memory charges_,
+        Pool[] memory chargedPools_
+    ) internal {
+        require(charges_.length == chargedPools_.length);
+        uint256 chargedEther;
+        for (uint256 i = 0; i < charges_.length; i++) {
+            if (charges_[i].asset == address(0)) {
+                require(msg.value >= chargedEther.add(charges_[i].value));
+            } else {
+                require(
+                    IERC20(charges_[i].asset).transferFrom(
+                        msg.sender,
+                        address(this),
+                        charges_[i].value
+                    )
+                );
+            }
+
+            chargedPools_[i] == Pool.RELAY
+                ? _chargeRelayPool(charges_[i])
+                : _chargeOperationsPool(charges_[i]);
         }
-        emit RelayPoolCharged(pool_, amount_);
     }
 
     function _setTradingStrategy(ITradingStrategy strategy_) internal {
@@ -151,5 +169,17 @@ contract CopyTrader is ICopyTrader, Ownable {
         }
 
         require(result, "CopyTrader:_relay, execution failed ");
+    }
+
+    /// ===== GETTERS ===== ///
+
+    function poolSize(Pool pool_, address asset_)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return
+            pool_ == Pool.RELAY ? relayPools[asset_] : operationsPools[asset_];
     }
 }
