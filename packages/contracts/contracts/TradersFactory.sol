@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.7.5;
 pragma abicoder v2;
 
@@ -10,6 +12,8 @@ import "./interfaces/ITradingStrategy.sol";
 import "./interfaces/ICopyTrader.sol";
 
 import "./CopyTrader.sol";
+
+import "hardhat/console.sol";
 
 contract TradersFactory is ITradersFactory {
     using SafeMath for uint256;
@@ -32,6 +36,9 @@ contract TradersFactory is ITradersFactory {
 
         for (uint256 i = 0; i < relayPoolCharges_.length; i++) {
             _chargePool(address(trader_), _chargedEther, relayPoolCharges_[i]);
+            if (relayPoolCharges_[i].asset == address(0)) {
+                _chargedEther = _chargedEther.add(relayPoolCharges_[i].value);
+            }
         }
         for (uint256 i = 0; i < operationsPoolCharges_.length; i++) {
             _chargePool(
@@ -39,9 +46,15 @@ contract TradersFactory is ITradersFactory {
                 _chargedEther,
                 operationsPoolCharges_[i]
             );
+            if (operationsPoolCharges_[i].asset == address(0)) {
+                _chargedEther = _chargedEther.add(
+                    operationsPoolCharges_[i].value
+                );
+            }
         }
 
         if (_chargedEther != 0) {
+            console.log(_chargedEther);
             payable(address(trader_)).transfer(_chargedEther);
         }
 
@@ -63,11 +76,8 @@ contract TradersFactory is ITradersFactory {
     ) internal {
         if (poolCharge_.asset == address(0)) {
             require(
-                msg.value == poolCharge_.value.add(alreadyChargedEther_),
+                msg.value >= poolCharge_.value.add(alreadyChargedEther_),
                 "TradersFactory:_chargePool, ether failed"
-            );
-            alreadyChargedEther_ = alreadyChargedEther_.add(
-                alreadyChargedEther_
             );
         } else {
             require(
