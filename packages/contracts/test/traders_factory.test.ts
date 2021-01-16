@@ -1,8 +1,7 @@
 //@ts-ignore
 import { ethers } from 'hardhat';
-import { Signer } from 'ethers';
-import { parseEther } from 'ethers/utils';
-import { AddressZero } from 'ethers/constants';
+import { Signer, constants } from 'ethers';
+import { parseEther } from 'ethers/lib/utils';
 
 import { step } from 'mocha-steps';
 import { assert } from 'chai';
@@ -73,11 +72,11 @@ describe('TradersFactory: test', function () {
     const operationsPoolCharge = parseEther('5');
 
     const chargesToBeDone: CopyTraderPoolChargeStruct[] = [
-      { asset: AddressZero, value: operationsPoolCharge.toHexString() },
-      { asset: AddressZero, value: relayPoolCharge.toHexString() },
+      { asset: constants.AddressZero, value: operationsPoolCharge.toHexString() },
+      { asset: constants.AddressZero, value: relayPoolCharge.toHexString() },
     ];
     const poolsToBeCharged = [CopyTraderPool.OPERATIONS, CopyTraderPool.RELAY];
-
+    // @ts-ignore
     const contractBalanceBeforeCharge = await accounts[0].provider.getBalance(
       copyTrader.address,
     );
@@ -91,7 +90,7 @@ describe('TradersFactory: test', function () {
 
     // Assert 2 events have been emitted
     assert.equal(poolChargedEmittedEvents.length, poolsToBeCharged.length);
-
+    // @ts-ignore
     const contractBalanceAfterCharge = await accounts[0].provider.getBalance(
       copyTrader.address,
     );
@@ -106,11 +105,11 @@ describe('TradersFactory: test', function () {
 
     const relayPool = await copyTrader.poolSize(
       CopyTraderPool.RELAY,
-      AddressZero,
+      constants.AddressZero,
     );
     const operationsPool = await copyTrader.poolSize(
       CopyTraderPool.OPERATIONS,
-      AddressZero,
+      constants.AddressZero,
     );
 
     // Relay pool has 3 ethers in

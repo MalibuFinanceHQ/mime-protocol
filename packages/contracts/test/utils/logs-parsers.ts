@@ -1,10 +1,11 @@
-import { ContractReceipt } from 'ethers/contract';
+import { ContractReceipt } from 'ethers';
 
 import { TradersFactoryTraderCreatedEvent, PoolChargedEvent } from './types';
 
 export function parseCopyTraderCreationFromFactory(
   receipt: ContractReceipt,
 ): TradersFactoryTraderCreatedEvent {
+  // @ts-ignore
   const event = <any>receipt.events[receipt.events.length - 1].args;
 
   return {
