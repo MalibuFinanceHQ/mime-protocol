@@ -18,7 +18,7 @@ import {
 
 import {
   parseCopyTraderCreationFromFactory,
-  parseCopyTraderChargeEvents,
+  parseCopyTraderChargedEvents,
 } from './utils/logs-parsers';
 import { CopyTraderPoolChargeStruct, CopyTraderPool } from './utils/types';
 
@@ -87,7 +87,7 @@ describe('TradersFactory: test', function () {
     });
 
     const receipt = await tx.wait();
-    const poolChargedEmittedEvents = parseCopyTraderChargeEvents(<any>receipt);
+    const poolChargedEmittedEvents = parseCopyTraderChargedEvents(<any>receipt);
 
     // Assert 2 events have been emitted
     assert.equal(poolChargedEmittedEvents.length, poolsToBeCharged.length);

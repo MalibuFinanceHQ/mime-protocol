@@ -14,7 +14,7 @@ export function parseCopyTraderCreationFromFactory(
   };
 }
 
-export function parseCopyTraderChargeEvents(
+export function parseCopyTraderChargedEvents(
   receipt: ContractReceipt,
 ): PoolChargedEvent[] {
   const events = <any>receipt.events;
