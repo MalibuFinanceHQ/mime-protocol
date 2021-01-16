@@ -92,7 +92,7 @@ contract CopyTrader is ICopyTrader, Ownable {
             charge_.value
         );
 
-        emit RelayPoolCharged(charge_);
+        emit PoolCharged(charge_, Pool.RELAY);
     }
 
     function _chargeOperationsPool(PoolCharge memory charge_) internal {
@@ -100,7 +100,7 @@ contract CopyTrader is ICopyTrader, Ownable {
             charge_.value
         );
 
-        emit OperationsPoolCharged(charge_);
+        emit PoolCharged(charge_, Pool.OPERATIONS);
     }
 
     function _handleMultipleCharges(

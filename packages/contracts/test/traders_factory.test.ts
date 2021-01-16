@@ -1,7 +1,7 @@
 //@ts-ignore
 import { ethers } from 'hardhat';
 import { Signer } from 'ethers';
-import { formatEther, parseEther } from 'ethers/utils';
+import { parseEther } from 'ethers/utils';
 import { AddressZero } from 'ethers/constants';
 
 import { step } from 'mocha-steps';
@@ -16,8 +16,11 @@ import {
   TradingStrategy__factory,
 } from '../typechain';
 
-import { parseCopyTraderCreationFromFactory } from './utils/logs-parsers';
-import { CopyTraderPoolChargeStruct } from './utils/types';
+import {
+  parseCopyTraderCreationFromFactory,
+  parseCopyTraderChargeEvents,
+} from './utils/logs-parsers';
+import { CopyTraderPoolChargeStruct, CopyTraderPool } from './utils/types';
 
 describe('TradersFactory: test', function () {
   let accounts: Signer[];
@@ -73,7 +76,7 @@ describe('TradersFactory: test', function () {
       { asset: AddressZero, value: operationsPoolCharge.toHexString() },
       { asset: AddressZero, value: relayPoolCharge.toHexString() },
     ];
-    const poolsToBeCharged = [1, 0];
+    const poolsToBeCharged = [CopyTraderPool.OPERATIONS, CopyTraderPool.RELAY];
 
     const contractBalanceBeforeCharge = await accounts[0].provider.getBalance(
       copyTrader.address,
@@ -84,6 +87,10 @@ describe('TradersFactory: test', function () {
     });
 
     const receipt = await tx.wait();
+    const poolChargedEmittedEvents = parseCopyTraderChargeEvents(<any>receipt);
+
+    // Assert 2 events have been emitted
+    assert.equal(poolChargedEmittedEvents.length, poolsToBeCharged.length);
 
     const contractBalanceAfterCharge = await accounts[0].provider.getBalance(
       copyTrader.address,
@@ -97,8 +104,14 @@ describe('TradersFactory: test', function () {
       contractBalanceAfterCharge.toHexString(),
     );
 
-    const relayPool = await copyTrader.poolSize(0, AddressZero);
-    const operationsPool = await copyTrader.poolSize(1, AddressZero);
+    const relayPool = await copyTrader.poolSize(
+      CopyTraderPool.RELAY,
+      AddressZero,
+    );
+    const operationsPool = await copyTrader.poolSize(
+      CopyTraderPool.OPERATIONS,
+      AddressZero,
+    );
 
     // Relay pool has 3 ethers in
     assert.equal(relayPool.toHexString(), relayPoolCharge.toHexString());

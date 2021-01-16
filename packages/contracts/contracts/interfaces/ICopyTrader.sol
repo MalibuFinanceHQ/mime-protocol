@@ -13,16 +13,9 @@ interface ICopyTrader {
     event Follow(address indexed previouslyFollowed, address indexed newFollow);
 
     /**
-     * @dev emitted when a certain transaction relay pool is top up
-     * and in consequence some funds are taken in disposition to refund transaction relayers.
+     * @dev emitted when a certain pool is top up.
      */
-    event RelayPoolCharged(PoolCharge charge);
-
-    /**
-     * @dev emitted when a certain operations pool is top up
-     * and in consequence some funds are taken in disposition to refund transaction relayers.
-     */
-    event OperationsPoolCharged(PoolCharge charge);
+    event PoolCharged(PoolCharge charge, Pool pool);
 
     /**
      * @dev emmited when a relayed tx recipient is whitelisted.
