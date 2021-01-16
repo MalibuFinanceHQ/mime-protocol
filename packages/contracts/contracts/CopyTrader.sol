@@ -6,12 +6,14 @@ pragma abicoder v2;
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/access/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 
 import "./interfaces/ICopyTrader.sol";
 import "./interfaces/ITradingStrategy.sol";
 import "./interfaces/IABIManipulator.sol";
 
-import "./utils/ABIParserLib.sol";
+import "./utils/AbiUtils.sol";
+import "./utils/EIP155Utils.sol";
 
 import "hardhat/console.sol";
 
@@ -32,11 +34,6 @@ contract CopyTrader is ICopyTrader, Ownable {
      * @dev address which's transactions are to be copied.
      */
     address public followedTrader;
-
-    /**
-     * @dev map(protocol => interactionAllowed).
-     */
-    mapping(address => bool) recipientsWhitelist;
 
     /**
      * @dev map(poolAsset => poolSize).
@@ -64,13 +61,6 @@ contract CopyTrader is ICopyTrader, Ownable {
         onlyOwner
     {
         _setTradingStrategy(strategy_);
-    }
-
-    function relay(address recipient_, bytes calldata abiEncodedCall_)
-        external
-    {
-        bytes4 methodSignature =
-            ABIParserLib.extractMethodSignature(abiEncodedCall_);
     }
 
     function chargePools(
@@ -136,36 +126,51 @@ contract CopyTrader is ICopyTrader, Ownable {
         tradingStrategy = strategy_;
     }
 
-    function _relay(
-        uint256 gasLimit_,
-        address recipient_,
-        uint256 value_,
-        uint256 dataLength_,
-        bytes calldata abiEncodedCall_,
-        bytes calldata signature_
-    ) internal {
-        bytes4 methodSignature =
-            ABIParserLib.extractMethodSignature(abiEncodedCall_);
+    function _isRLPSignatureCorrect(
+        bytes calldata transaction_,
+        bytes calldata signature_,
+        address signer_
+    ) internal pure returns (bool) {
+        bytes32 txHash = keccak256(transaction_);
+        return signer_ == ECDSA.recover(txHash, signature_);
+    }
 
-        // TODO verify that relayed transaction is signed by _followedTrader
+    function _relay(bytes calldata transaction_, bytes calldata signature_)
+        internal
+    {
+        // TODO replay protection
+        require(
+            _isRLPSignatureCorrect(transaction_, signature_, followedTrader)
+        );
+
+        EIP155Utils.EIP155Transaction memory eip155tx =
+            EIP155Utils.decodeEIP155Transaction(transaction_);
+
+        bytes4 methodSignature = AbiUtils.extractMethodSignature(eip155tx.data);
 
         require(
-            recipientsWhitelist[recipient_],
-            "CopyTrader:_relay, recipient not whitelisted"
+            tradingStrategy.manipulatorOf(eip155tx.to, methodSignature) !=
+                address(0),
+            "CopyTrader:_relay, method not defined in strategy"
         );
 
         bytes memory abiManipulated =
             IABIManipulator(
-                tradingStrategy.manipulatorOf(recipient_, methodSignature)
+                tradingStrategy.manipulatorOf(eip155tx.to, methodSignature)
             )
-                .manipulate(abiEncodedCall_);
+                .manipulate(eip155tx.data);
+
+        uint256 dataLength = abiManipulated.length;
+        uint256 gasLimit = eip155tx.gasLimit;
+        uint256 value = eip155tx.value;
+        address to = eip155tx.to;
 
         bool result;
 
         assembly {
             let x := mload(0x40)
             let d := add(abiManipulated, 32)
-            result := call(gasLimit_, recipient_, value_, d, dataLength_, x, 0)
+            result := call(gasLimit, to, value, d, dataLength, x, 0)
         }
 
         require(result, "CopyTrader:_relay, execution failed ");

@@ -4,7 +4,7 @@ pragma solidity 0.7.5;
 
 import "./BytesLib.sol";
 
-library ABIParserLib {
+library AbiUtils {
     using BytesLib for bytes;
 
     function extractMethodSignature(bytes memory abiEncodedCall)
