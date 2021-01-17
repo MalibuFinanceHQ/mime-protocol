@@ -163,14 +163,17 @@ describe('TradersFactory: test', function () {
       );
       console.log(signature._vs);
 
-      const isSigValid = await copyTrader.isRLPSignatureCorrect(
+      const [
+        isValid,
+        onChainComputedTxHash,
+      ] = await copyTrader.isRLPSignatureCorrect(
         rlpEncodedTx,
         signature.v,
         signature.r,
         signature.s,
       );
 
-      console.log(isSigValid);
+      console.log(isValid);
     },
   );
 });

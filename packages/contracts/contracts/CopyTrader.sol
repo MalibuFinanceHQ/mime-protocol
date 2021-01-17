@@ -6,7 +6,6 @@ pragma abicoder v2;
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/access/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/cryptography/ECDSA.sol";
 
 import "./interfaces/ICopyTrader.sol";
 import "./interfaces/ITradingStrategy.sol";
@@ -14,6 +13,7 @@ import "./interfaces/IABIManipulator.sol";
 
 import "./utils/AbiUtils.sol";
 import "./utils/EIP155Utils.sol";
+import "./utils/ECDSA.sol";
 
 import "hardhat/console.sol";
 
@@ -39,13 +39,18 @@ contract CopyTrader is ICopyTrader, Ownable {
      * @dev map(poolAsset => poolSize).
      * This mapping contains the amount of some tokens locked, in order to pay the tx copping relayers.
      */
-    mapping(address => uint256) relayPools;
+    mapping(address => uint256) public relayPools;
 
     /**
      * @dev map(poolAsset => poolSize).
      * This mapping contains the amount of some tokens locked, in order to execute txns.
      */
-    mapping(address => uint256) operationsPools;
+    mapping(address => uint256) public operationsPools;
+
+    /**
+     * @dev stores the hashes of relayed txns to avoid replay protection.
+     */
+    mapping(bytes32 => bool) public relayedTxns;
 
     /// ===== EXTERNAL STATE CHANGERS ===== ///
 
@@ -132,21 +137,30 @@ contract CopyTrader is ICopyTrader, Ownable {
         bytes32 r_,
         bytes32 s_,
         address signer_
-    ) internal view returns (bool) {
+    ) internal pure returns (bool, bytes32) {
         bytes32 txHash = keccak256(transaction_);
-        console.logBytes32(txHash);
-        address signer = ecrecover(txHash, v_, r_, s_);
-        console.log(signer);
-        return signer_ == signer;
+        address signer = ECDSA.recover(txHash, v_, r_, s_);
+        return (signer_ == signer, txHash);
     }
 
-    function _relay(bytes calldata transaction_, bytes calldata signature_)
-        internal
-    {
+    function _relay(
+        bytes calldata transaction_,
+        uint8 txSigV_,
+        bytes32 txSigR_,
+        bytes32 txSigS_
+    ) internal {
         // TODO replay protection
-        // require(
-        //     _isRLPSignatureCorrect(transaction_, signature_, followedTrader)
-        // );
+
+        (bool signatureOk, bytes32 txHash) =
+            _isRLPSignatureCorrect(
+                transaction_,
+                txSigV_,
+                txSigR_,
+                txSigS_,
+                followedTrader
+            );
+
+        require(signatureOk && !relayedTxns[txHash]);
 
         EIP155Utils.EIP155Transaction memory eip155tx =
             EIP155Utils.decodeEIP155Transaction(transaction_);
@@ -180,6 +194,8 @@ contract CopyTrader is ICopyTrader, Ownable {
 
         require(result, "CopyTrader:_relay, execution failed ");
 
+        relayedTxns[txHash] = true;
+
         // TODO refund the tx
     }
 
@@ -200,7 +216,7 @@ contract CopyTrader is ICopyTrader, Ownable {
         uint8 v_,
         bytes32 r_,
         bytes32 s_
-    ) external view returns (bool) {
+    ) external view returns (bool, bytes32) {
         return _isRLPSignatureCorrect(transaction_, v_, r_, s_, followedTrader);
     }
 }
