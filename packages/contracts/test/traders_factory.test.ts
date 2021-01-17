@@ -1,7 +1,16 @@
 //@ts-ignore
 import { ethers } from 'hardhat';
-import { Signer, constants } from 'ethers';
-import { parseEther } from 'ethers/lib/utils';
+import { Signer, constants, Transaction } from 'ethers';
+import {
+  parseEther,
+  parseUnits,
+  RLP,
+  serializeTransaction,
+  resolveProperties,
+  keccak256,
+  arrayify,
+  SigningKey,
+} from 'ethers/lib/utils';
 
 import { step } from 'mocha-steps';
 import { assert } from 'chai';
@@ -28,6 +37,12 @@ describe('TradersFactory: test', function () {
   let tradingStrategy: TradingStrategy;
   let copyTrader: CopyTrader;
 
+  const followed = {
+    address: '0xddCE109D158330Cd18Fa7d28b66D7c7fDA78EA38',
+    privKey:
+      '0x1745cbb13e736e376d12dc57ea48ff8d25b10e2d59573db5519a07e11a4b9964',
+  };
+
   this.beforeAll(async () => {
     accounts = await ethers.getSigners();
 
@@ -42,11 +57,9 @@ describe('TradersFactory: test', function () {
   step(
     'Should deploy a new copy trader and check if owner is correct',
     async () => {
-      const followedTrader = await accounts[1].getAddress();
-
       const deploymentTx = await factory
         .connect(accounts[0])
-        .createNew(followedTrader, tradingStrategy.address);
+        .createNew(followed.address, tradingStrategy.address);
 
       const receipt = await deploymentTx.wait();
       const traderCreationEvent = parseCopyTraderCreationFromFactory(
@@ -72,7 +85,10 @@ describe('TradersFactory: test', function () {
     const operationsPoolCharge = parseEther('5');
 
     const chargesToBeDone: CopyTraderPoolChargeStruct[] = [
-      { asset: constants.AddressZero, value: operationsPoolCharge.toHexString() },
+      {
+        asset: constants.AddressZero,
+        value: operationsPoolCharge.toHexString(),
+      },
       { asset: constants.AddressZero, value: relayPoolCharge.toHexString() },
     ];
     const poolsToBeCharged = [CopyTraderPool.OPERATIONS, CopyTraderPool.RELAY];
@@ -90,8 +106,8 @@ describe('TradersFactory: test', function () {
 
     // Assert 2 events have been emitted
     assert.equal(poolChargedEmittedEvents.length, poolsToBeCharged.length);
-    // @ts-ignore
-    const contractBalanceAfterCharge = await accounts[0].provider.getBalance(
+
+    const contractBalanceAfterCharge = await accounts[0].provider?.getBalance(
       copyTrader.address,
     );
 
@@ -100,7 +116,7 @@ describe('TradersFactory: test', function () {
         .add(relayPoolCharge.toHexString())
         .add(operationsPoolCharge.toHexString())
         .toHexString(),
-      contractBalanceAfterCharge.toHexString(),
+      contractBalanceAfterCharge?.toHexString(),
     );
 
     const relayPool = await copyTrader.poolSize(
@@ -121,4 +137,40 @@ describe('TradersFactory: test', function () {
       operationsPoolCharge.toHexString(),
     );
   });
+
+  step(
+    'Should check if the signature is correctly recovered onchain',
+    async () => {
+      const tx = {
+        to: constants.AddressZero,
+        value: 0,
+        gasLimit: 21000,
+        gasPrice: parseUnits('21', 'gwei').toHexString(),
+      };
+
+      const rsTx = await resolveProperties(tx);
+
+      console.log(await accounts[1].getAddress());
+
+      const rlpEncodedTx = serializeTransaction(<any>rsTx);
+
+      const msgHash = keccak256(rlpEncodedTx);
+      console.log(msgHash);
+      const msgHashBytes = arrayify(msgHash);
+
+      const signature = new SigningKey(followed.privKey).signDigest(
+        msgHashBytes,
+      );
+      console.log(signature._vs);
+
+      const isSigValid = await copyTrader.isRLPSignatureCorrect(
+        rlpEncodedTx,
+        signature.v,
+        signature.r,
+        signature.s,
+      );
+
+      console.log(isSigValid);
+    },
+  );
 });

@@ -128,20 +128,25 @@ contract CopyTrader is ICopyTrader, Ownable {
 
     function _isRLPSignatureCorrect(
         bytes calldata transaction_,
-        bytes calldata signature_,
+        uint8 v_,
+        bytes32 r_,
+        bytes32 s_,
         address signer_
-    ) internal pure returns (bool) {
+    ) internal view returns (bool) {
         bytes32 txHash = keccak256(transaction_);
-        return signer_ == ECDSA.recover(txHash, signature_);
+        console.logBytes32(txHash);
+        address signer = ecrecover(txHash, v_, r_, s_);
+        console.log(signer);
+        return signer_ == signer;
     }
 
     function _relay(bytes calldata transaction_, bytes calldata signature_)
         internal
     {
         // TODO replay protection
-        require(
-            _isRLPSignatureCorrect(transaction_, signature_, followedTrader)
-        );
+        // require(
+        //     _isRLPSignatureCorrect(transaction_, signature_, followedTrader)
+        // );
 
         EIP155Utils.EIP155Transaction memory eip155tx =
             EIP155Utils.decodeEIP155Transaction(transaction_);
@@ -188,5 +193,14 @@ contract CopyTrader is ICopyTrader, Ownable {
     {
         return
             pool_ == Pool.RELAY ? relayPools[asset_] : operationsPools[asset_];
+    }
+
+    function isRLPSignatureCorrect(
+        bytes calldata transaction_,
+        uint8 v_,
+        bytes32 r_,
+        bytes32 s_
+    ) external view returns (bool) {
+        return _isRLPSignatureCorrect(transaction_, v_, r_, s_, followedTrader);
     }
 }
