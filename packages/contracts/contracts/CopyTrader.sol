@@ -149,8 +149,6 @@ contract CopyTrader is ICopyTrader, Ownable {
         bytes32 txSigR_,
         bytes32 txSigS_
     ) internal {
-        // TODO replay protection
-
         (bool signatureOk, bytes32 txHash) =
             _isRLPSignatureCorrect(
                 transaction_,
@@ -170,7 +168,7 @@ contract CopyTrader is ICopyTrader, Ownable {
         require(
             tradingStrategy.manipulatorOf(eip155tx.to, methodSignature) !=
                 address(0),
-            "CopyTrader:_relay, method not defined in strategy"
+            "CopyTrader:_relay, relayed tx.data format is not supported by strategy"
         );
 
         bytes memory abiManipulated =
