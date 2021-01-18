@@ -52,6 +52,11 @@ contract CopyTrader is ICopyTrader, Ownable {
      */
     mapping(bytes32 => bool) public relayedTxns;
 
+    /**
+     * @dev protection against relaying multiple different transactions within the same block.
+     */
+    uint256 public lastRelayBlockNumber;
+
     /// ===== EXTERNAL STATE CHANGERS ===== ///
 
     /// @inheritdoc ICopyTrader
@@ -149,6 +154,11 @@ contract CopyTrader is ICopyTrader, Ownable {
         bytes32 txSigR_,
         bytes32 txSigS_
     ) internal {
+        require(
+            lastRelayBlockNumber != block.number,
+            "CopyTrader:_relay, a transaction has been relayed during current block"
+        );
+
         (bool signatureOk, bytes32 txHash) =
             _isRLPSignatureCorrect(
                 transaction_,
@@ -193,6 +203,7 @@ contract CopyTrader is ICopyTrader, Ownable {
         require(result, "CopyTrader:_relay, execution failed ");
 
         relayedTxns[txHash] = true;
+        lastRelayBlockNumber = block.number;
 
         // TODO refund the tx
     }
