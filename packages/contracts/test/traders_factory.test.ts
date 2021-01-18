@@ -1,6 +1,12 @@
 //@ts-ignore
 import { ethers } from 'hardhat';
-import { Signer, constants, Wallet } from 'ethers';
+import {
+  Signer,
+  constants,
+  Wallet,
+  BigNumber,
+  UnsignedTransaction,
+} from 'ethers';
 import {
   parseEther,
   parseUnits,
@@ -8,7 +14,6 @@ import {
   resolveProperties,
   keccak256,
   arrayify,
-  SigningKey,
   parseTransaction,
 } from 'ethers/lib/utils';
 
@@ -139,44 +144,39 @@ describe('TradersFactory: test', function () {
   step(
     'Should check if the signature correctly created and is able to be recovered onchain',
     async () => {
-      const tx = {
+      const tx: UnsignedTransaction = {
         to: constants.AddressZero,
-        value: 0,
-        gasLimit: 21000,
-        gasPrice: parseUnits('21', 'gwei').toHexString(),
+        value: BigNumber.from(0),
+        gasLimit: BigNumber.from(21000),
+        gasPrice: parseUnits('21', 'gwei'),
         nonce: await accounts[0].provider?.getTransactionCount(
           followed.address,
         ),
+        chainId: await accounts[0].getChainId(),
+        data: '0x',
       };
 
-      const rsTx = await resolveProperties(tx);
-
-      const rlpEncodedTx = serializeTransaction(<any>rsTx);
+      const txResolved = await resolveProperties(tx);
+      const rlpEncodedTx = serializeTransaction(txResolved);
 
       const msgHash = keccak256(rlpEncodedTx);
-      const msgHashBytes = arrayify(msgHash);
 
-      const signature = new SigningKey(followed.privateKey).signDigest(
-        msgHashBytes,
-      );
+      const signedRawWalletTx = await new Wallet(
+        followed.privateKey,
+      ).signTransaction(tx);
 
       const parsedWalletSignedTx = parseTransaction(
-        arrayify(await new Wallet(followed.privateKey).signTransaction(tx)),
+        arrayify(signedRawWalletTx),
       );
-
-      // Assert signature is properly generated
-      assert.equal(parsedWalletSignedTx.v, signature.v);
-      assert.equal(parsedWalletSignedTx.r, signature.r);
-      assert.equal(parsedWalletSignedTx.s, signature.s);
 
       const [
         isValid,
         onChainComputedTxHash,
       ] = await copyTrader.isRLPSignatureCorrect(
         rlpEncodedTx,
-        signature.v,
-        signature.r,
-        signature.s,
+        28,
+        parsedWalletSignedTx.r!,
+        parsedWalletSignedTx.s!,
       );
 
       assert.isTrue(isValid);
