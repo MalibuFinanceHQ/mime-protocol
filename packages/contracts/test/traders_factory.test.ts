@@ -4,7 +4,6 @@ import { Signer, constants, Transaction } from 'ethers';
 import {
   parseEther,
   parseUnits,
-  RLP,
   serializeTransaction,
   resolveProperties,
   keccak256,
