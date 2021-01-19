@@ -144,6 +144,8 @@ describe('TradersFactory: test', function () {
   step(
     'Should check if the signature correctly created and is able to be recovered onchain',
     async () => {
+      const providers = ethers.providers;
+
       const tx: UnsignedTransaction = {
         to: constants.AddressZero,
         value: BigNumber.from(0),
@@ -152,29 +154,38 @@ describe('TradersFactory: test', function () {
         nonce: await accounts[0].provider?.getTransactionCount(
           followed.address,
         ),
-        chainId: await accounts[0].getChainId(),
+        chainId: 43110,
+        // chainId: await accounts[0].getChainId(),
         data: '0x',
       };
-
       const txResolved = await resolveProperties(tx);
       const rlpEncodedTx = serializeTransaction(txResolved);
 
       const msgHash = keccak256(rlpEncodedTx);
 
-      const signedRawWalletTx = await new Wallet(
-        followed.privateKey,
-      ).signTransaction(tx);
-
+      const wallet = new Wallet(
+        followed.privateKey
+      );
+      const signedRawWalletTx = await wallet.signTransaction(tx);
+      // const provider = providers.getDefaultProvider();
       const parsedWalletSignedTx = parseTransaction(
         arrayify(signedRawWalletTx),
       );
+      console.log('v', parsedWalletSignedTx);
+      console.log('assumption', 27 + (43110 * 2) + 8);
 
+      const chainID = 43110;
+      const assumption = 27 + (chainID * 2) + 8;
+      const parsedV: number | undefined = parsedWalletSignedTx.v;
+      const finalV = parsedV === assumption ? 27 : 28;
+
+      console.log('finalV', finalV);
       const [
         isValid,
         onChainComputedTxHash,
       ] = await copyTrader.isRLPSignatureCorrect(
         rlpEncodedTx,
-        28,
+        finalV,
         parsedWalletSignedTx.r!,
         parsedWalletSignedTx.s!,
       );
