@@ -154,7 +154,7 @@ describe('TradersFactory: test', function () {
         nonce: await accounts[0].provider?.getTransactionCount(
           followed.address,
         ),
-        chainId: 43110,
+        chainId: 2,
         // chainId: await accounts[0].getChainId(),
         data: '0x',
       };
@@ -174,7 +174,7 @@ describe('TradersFactory: test', function () {
       console.log('v', parsedWalletSignedTx);
       console.log('assumption', 27 + (43110 * 2) + 8);
 
-      const chainID = 43110;
+      const chainID = tx.chainId || 0;
       const assumption = 27 + (chainID * 2) + 8;
       const parsedV: number | undefined = parsedWalletSignedTx.v;
       const finalV = parsedV === assumption ? 27 : 28;
