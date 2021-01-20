@@ -17,11 +17,6 @@ interface ICopyTrader {
      */
     event PoolCharged(PoolCharge charge, Pool pool);
 
-    /**
-     * @dev emmited when a relayed tx recipient is whitelisted.
-     */
-    event RecipientWhitelisted(address recipient);
-
     event TradingStrategyChange(
         address indexed previousStrategy,
         address indexed newStrategy
