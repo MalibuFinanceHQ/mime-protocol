@@ -144,8 +144,6 @@ describe('TradersFactory: test', function () {
   step(
     'Should check if the signature correctly created and is able to be recovered onchain',
     async () => {
-      const providers = ethers.providers;
-
       const tx: UnsignedTransaction = {
         to: constants.AddressZero,
         value: BigNumber.from(0),
@@ -154,8 +152,7 @@ describe('TradersFactory: test', function () {
         nonce: await accounts[0].provider?.getTransactionCount(
           followed.address,
         ),
-        chainId: 2,
-        // chainId: await accounts[0].getChainId(),
+        chainId: await accounts[0].getChainId(),
         data: '0x',
       };
       const txResolved = await resolveProperties(tx);
@@ -167,19 +164,15 @@ describe('TradersFactory: test', function () {
         followed.privateKey
       );
       const signedRawWalletTx = await wallet.signTransaction(tx);
-      // const provider = providers.getDefaultProvider();
       const parsedWalletSignedTx = parseTransaction(
         arrayify(signedRawWalletTx),
       );
-      console.log('v', parsedWalletSignedTx);
-      console.log('assumption', 27 + (43110 * 2) + 8);
 
       const chainID = tx.chainId || 0;
       const assumption = 27 + (chainID * 2) + 8;
       const parsedV: number | undefined = parsedWalletSignedTx.v;
       const finalV = parsedV === assumption ? 27 : 28;
 
-      console.log('finalV', finalV);
       const [
         isValid,
         onChainComputedTxHash,
