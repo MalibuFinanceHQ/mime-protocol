@@ -13,12 +13,12 @@ import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 library PricesLib {
     using SafeMath for uint256;
 
-    function getLastPrice(address feesPaymentsAsset)
+    function getLastPrice(address liquidityPool)
         internal
         view
         returns (uint256)
     {
-        IUniswapV2Pair pair = IUniswapV2Pair(feesPaymentsAsset);
+        IUniswapV2Pair pair = IUniswapV2Pair(liquidityPool);
         require(address(pair) != address(0), "Invalid Uniswap pair");
         (uint112 reserve0, uint112 reserve1, ) = pair.getReserves();
         uint256 token0Balance = uint256(reserve0);
