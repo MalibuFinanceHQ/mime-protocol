@@ -6,23 +6,26 @@ import { CopyTradingContract } from './CopyTradingContract.entity';
 
 @Entity()
 export class Strategy extends BaseEntity {
-  @PrimaryColumn({ unique: true })
-  name: string;
+  @PrimaryColumn({ unique: true, type: 'varchar' })
+  public address: string;
 
-  @Column()
-  description: string;
+  @Column({ type: 'varchar', nullable: true })
+  public name: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  public description: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  public updatedAt: Date;
 
   @DeleteDateColumn()
-  deletedAt: Date;
+  public deletedAt: Date;
 
   // Relations
 
   @ManyToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.strategies)
-  copyTradingContracts: CopyTradingContract[];
+  public copyTradingContracts: CopyTradingContract[];
 }

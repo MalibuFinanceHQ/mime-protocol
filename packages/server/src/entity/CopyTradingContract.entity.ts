@@ -16,40 +16,40 @@ export class CopyTradingContract extends BaseEntity {
     type: 'varchar',
     unique: true,
   })
-  address: string;
+  public address: string;
 
   @Column({ type: 'jsonb' })
-  relayPools: Record<string, string>;
+  public relayPoolsBalances: Record<string, string>;
 
   @Column({ type: 'jsonb' })
-  operationsPools: Record<string, string>;
+  public operationsPoolsBalances: Record<string, string>;
 
   @CreateDateColumn()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  public updatedAt: Date;
 
   @DeleteDateColumn()
-  deletedAt: Date;
+  public deletedAt: Date;
 
   // Relations
 
   @ManyToOne(() => User, user => user.copyTradingContracts)
   @JoinColumn()
-  owner: User;
+  public owner: User;
 
   @ManyToMany(() => Strategy)
   @JoinTable()
-  strategies: Strategy[];
+  public strategies: Strategy[];
 
   @ManyToMany(() => FollowedTrader)
   @JoinTable()
-  followedTraders: FollowedTrader[];
+  public followedTraders: FollowedTrader[];
 
   @OneToMany(() => PoolTopUp, poolTopUp => poolTopUp.copyTradingContract)
-  poolTopUps: PoolTopUp[];
+  public poolTopUps: PoolTopUp[];
 
   @OneToMany(() => Transaction, transaction => transaction.copyTradingContract)
-  relayedTxns: Transaction[];
+  public relayedTxns: Transaction[];
 }
