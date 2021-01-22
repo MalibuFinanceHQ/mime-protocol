@@ -5,41 +5,42 @@ import {
 import { CopyTradingContract } from './CopyTradingContract.entity';
 import { FollowedTrader } from './FollowedTrader.entity';
 
-export type TransactionType = 'unknown' | 'copied' | 'relayed';
+import { RelayerTransactionStatus } from '../common/enums';
+
 
 @Entity()
 export class Transaction extends BaseEntity {
-  @PrimaryColumn()
-  hash: string;
+  @PrimaryColumn({ type: 'varchar' })
+  public hash: string;
 
   // Suggestion: implement other fields such as "from" and "to".
 
-  @Column('json')
-  details: JSON;
+  @Column({ type: 'jsonb' })
+  public details: any;
 
   @Column({
     type: 'enum',
-    enum: ['unknown', 'copied', 'relayed'],
-    default: 'unknown',
+    enum: RelayerTransactionStatus,
+    default: RelayerTransactionStatus.PENDING,
   })
-  type: TransactionType;
+  public type: RelayerTransactionStatus;
 
   @CreateDateColumn()
-  createdAt: Date;
+  public createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  public updatedAt: Date;
 
   @DeleteDateColumn()
-  deletedAt: Date;
+  public deletedAt: Date;
 
   // Relations
 
   // *From* whom the *original* tx is copied.
   @ManyToOne(() => FollowedTrader, followedTrader => followedTrader.copiedTxns)
-  followedTrader: FollowedTrader;
+  public followedTrader: FollowedTrader;
 
   // *For* whom the *relayed* tx is relayed.
   @ManyToOne(() => CopyTradingContract, copyTradingContract => copyTradingContract.relayedTxns)
-  copyTradingContract: CopyTradingContract;
+  public copyTradingContract: CopyTradingContract;
 }

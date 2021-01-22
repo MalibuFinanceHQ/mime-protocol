@@ -11,7 +11,7 @@ export class FollowedTrader extends BaseEntity {
     type: 'varchar',
     unique: true,
   })
-  address: string;
+  public address: string;
 
   @CreateDateColumn()
   public createdAt: Date;
@@ -25,8 +25,8 @@ export class FollowedTrader extends BaseEntity {
   // Relations
 
   @ManyToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.followedTraders)
-  followersContracts: CopyTradingContract[];
+  public followersContracts: CopyTradingContract[];
 
   @OneToMany(() => Transaction, transaction => transaction.followedTrader)
-  copiedTxns: Transaction[];
+  public copiedTxns: Transaction[];
 }
