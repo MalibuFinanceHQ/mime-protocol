@@ -9,5 +9,9 @@
   },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "[solidity]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "solidity.compileUsingRemoteVersion": "v0.7.5+commit.eb77ed08"
 }

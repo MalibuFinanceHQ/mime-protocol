@@ -3,9 +3,9 @@
 pragma solidity 0.7.5;
 pragma abicoder v2;
 
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin-solidity/contracts/access/Ownable.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./interfaces/ICopyTrader.sol";
 import "./interfaces/ITradingStrategy.sol";
@@ -14,6 +14,7 @@ import "./interfaces/IABIManipulator.sol";
 import "./utils/AbiUtils.sol";
 import "./utils/EIP155Utils.sol";
 import "./utils/ECDSA.sol";
+import "./utils/PricesLib.sol";
 
 import "hardhat/console.sol";
 
@@ -57,10 +58,25 @@ contract CopyTrader is ICopyTrader, Ownable {
      */
     uint256 public lastRelayBlockNumber;
 
+    /**
+     * @dev asset used to refund the relayer's fees.
+     */
+    address public feesPaymentsAsset;
+
     /// ===== EXTERNAL STATE CHANGERS ===== ///
 
     /// @inheritdoc ICopyTrader
     function follow(address trader_) external override onlyOwner {
+        require(trader_ != msg.sender, "You cannot follow yourself");
+        require(
+            trader_ != address(this),
+            "This contract instance cannot follow itself"
+        );
+        require(
+            trader_ != followedTrader,
+            "You are already following this address"
+        );
+
         _follow(trader_);
     }
 
@@ -84,6 +100,7 @@ contract CopyTrader is ICopyTrader, Ownable {
 
     function _follow(address trader_) internal {
         emit Follow(followedTrader, trader_);
+
         followedTrader = trader_;
     }
 
@@ -200,7 +217,7 @@ contract CopyTrader is ICopyTrader, Ownable {
             result := call(gasLimit, to, value, d, dataLength, x, 0)
         }
 
-        require(result, "CopyTrader:_relay, execution failed ");
+        require(result, "CopyTrader:_relay, execution failed");
 
         relayedTxns[txHash] = true;
         lastRelayBlockNumber = block.number;
@@ -208,7 +225,15 @@ contract CopyTrader is ICopyTrader, Ownable {
         // TODO refund the tx
     }
 
+    function setFeesPaymentsAsset(address asset_) external override {
+        feesPaymentsAsset = asset_;
+    }
+
     /// ===== GETTERS ===== ///
+
+    function fetchLastPrice() external view override returns (uint256) {
+        return PricesLib.getLastPrice(feesPaymentsAsset);
+    }
 
     function poolSize(Pool pool_, address asset_)
         external

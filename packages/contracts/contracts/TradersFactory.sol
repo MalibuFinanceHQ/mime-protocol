@@ -3,7 +3,7 @@
 pragma solidity 0.7.5;
 pragma abicoder v2;
 
-import "openzeppelin-solidity/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/ITradersFactory.sol";
 import "./interfaces/ITradingStrategy.sol";

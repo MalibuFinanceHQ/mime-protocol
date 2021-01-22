@@ -57,4 +57,13 @@ interface ICopyTrader {
         external
         view
         returns (uint256);
+
+    /**
+     * @dev allows a relayer to update the asset to use for refunds.
+     * @notice the implementation must require the call
+     * to be made only by a relayer.
+     */
+    function setFeesPaymentsAsset(address asset_) external;
+
+    function fetchLastPrice() external view returns (uint256);
 }

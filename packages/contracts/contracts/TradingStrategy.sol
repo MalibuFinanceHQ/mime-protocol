@@ -2,7 +2,7 @@
 
 pragma solidity 0.7.5;
 
-import "openzeppelin-solidity/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/ITradingStrategy.sol";
 
 contract TradingStrategy is ITradingStrategy, Ownable {

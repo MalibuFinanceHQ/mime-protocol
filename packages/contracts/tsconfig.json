@@ -1,11 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es2018",
+    "target": "ESNext",
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "resolveJsonModule": true,
   },
-  "include": ["./scripts", "./test", "./node_modules/ethers-typescript-typings/index.d.ts"],
-  "files": ["./hardhat.config.ts"]
+  "include": [
+    "./scripts",
+    "./test"
+  ],
+  "files": [
+    "./hardhat.config.ts"
+  ]
 }
