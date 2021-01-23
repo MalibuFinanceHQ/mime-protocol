@@ -23,6 +23,9 @@ library PricesLib {
         view
         returns (uint256 tokenAmount)
     {
+        if (token == WETH_TOKEN || token == address(0)) {
+            return weiToConvert;
+        }
         require(weiToConvert > 0, "PricesLib: INSUFFICIENT_AMOUNT");
         IUniswapV2Pair pair =
             IUniswapV2Pair(UNISWAP_V2_FACTORY.getPair(token, WETH_TOKEN));

@@ -14,6 +14,12 @@ import "./interfaces/IABIManipulator.sol";
 abstract contract CopyTraderRelaysHandler {
     using SafeMath for uint256;
 
+    uint256 public constant AFTER_RELAY_ERC20_TRANSFER_GAS_USAGE_APPROXIMATION =
+        50000;
+    uint256 public constant AFTER_RELAY_ETH_TRANSFER_GAS_USAGE_APPROXIMATION =
+        2300;
+    uint256 public constant AFTER_RELAY_FETCH_GAS_USAGE_APPROXIMATION = 2000;
+
     /**
      * @dev division base when calculating relayer reward.
      * @notice relayer fee is the gas used by the tx converted to eth,
@@ -25,12 +31,6 @@ abstract contract CopyTraderRelaysHandler {
      * @dev relayer fee.
      */
     uint256 public relayerFee;
-
-    /**
-     * @dev map(poolAsset => poolSize).
-     * This mapping contains the amount of some tokens locked, in order to execute txns.
-     */
-    mapping(address => uint256) public operationsPools;
 
     /**
      * @dev stores the hashes of relayed txns to avoid replay protection.

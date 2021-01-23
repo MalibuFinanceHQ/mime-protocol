@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./CopyTraderManager.sol";
 import "./CopyTraderRelaysHandler.sol";
+import "./CopyTraderPools.sol";
 
 import "./interfaces/ICopyTrader.sol";
 import "./interfaces/ITradingStrategy.sol";
@@ -16,7 +17,12 @@ import "./utils/PricesLib.sol";
 
 import "hardhat/console.sol";
 
-contract CopyTrader is ICopyTrader, CopyTraderManager, CopyTraderRelaysHandler {
+contract CopyTrader is
+    ICopyTrader,
+    CopyTraderManager,
+    CopyTraderRelaysHandler,
+    CopyTraderPools
+{
     using SafeMath for uint256;
 
     /**
@@ -33,12 +39,6 @@ contract CopyTrader is ICopyTrader, CopyTraderManager, CopyTraderRelaysHandler {
      * @dev address which's transactions are to be copied.
      */
     address public followedTrader;
-
-    /**
-     * @dev map(poolAsset => poolSize).
-     * This mapping contains the amount of some tokens locked, in order to pay the tx copping relayers.
-     */
-    mapping(address => uint256) public relayPools;
 
     /**
      * @dev asset used to refund the relayer's fees.
@@ -96,53 +96,44 @@ contract CopyTrader is ICopyTrader, CopyTraderManager, CopyTraderRelaysHandler {
         _setRelayerFee(fee_);
     }
 
+    function relay(
+        address refundAsset_,
+        bytes calldata transaction_,
+        uint8 v_,
+        bytes32 r_,
+        bytes32 s_
+    ) external {
+        uint256 gasUsed =
+            (_relay(transaction_, followedTrader, tradingStrategy, v_, r_, s_))
+                .add(
+                refundAsset_ == address(0)
+                    ? AFTER_RELAY_ETH_TRANSFER_GAS_USAGE_APPROXIMATION
+                    : AFTER_RELAY_ERC20_TRANSFER_GAS_USAGE_APPROXIMATION
+            )
+                .add(AFTER_RELAY_FETCH_GAS_USAGE_APPROXIMATION);
+
+        uint256 weiSpent = gasUsed.mul(tx.gasprice);
+        uint256 weiToBeRefunded =
+            weiSpent.add(weiSpent.div(RELAYER_FEE_BASE).mul(relayerFee));
+        uint256 refundAmount =
+            PricesLib.tokenAmountFromWei(refundAsset_, weiToBeRefunded);
+
+        if (refundAsset_ == address(0)) {
+            msg.sender.transfer(refundAmount);
+        } else {
+            require(
+                IERC20(refundAsset_).transfer(msg.sender, refundAmount),
+                "CopyTrader:relay, ERC20 transfer failed"
+            );
+        }
+    }
+
     /// ===== INTERNAL STATE CHANGERS ===== ///
 
     function _follow(address trader_) internal {
         emit Follow(followedTrader, trader_);
 
         followedTrader = trader_;
-    }
-
-    function _chargeRelayPool(PoolCharge memory charge_) internal {
-        relayPools[charge_.asset] = relayPools[charge_.asset].add(
-            charge_.value
-        );
-
-        emit PoolCharged(charge_, Pool.RELAY);
-    }
-
-    function _chargeOperationsPool(PoolCharge memory charge_) internal {
-        operationsPools[charge_.asset] = operationsPools[charge_.asset].add(
-            charge_.value
-        );
-
-        emit PoolCharged(charge_, Pool.OPERATIONS);
-    }
-
-    function _handleMultipleCharges(
-        PoolCharge[] memory charges_,
-        Pool[] memory chargedPools_
-    ) internal {
-        require(charges_.length == chargedPools_.length);
-        uint256 chargedEther;
-        for (uint256 i = 0; i < charges_.length; i++) {
-            if (charges_[i].asset == address(0)) {
-                require(msg.value >= chargedEther.add(charges_[i].value));
-            } else {
-                require(
-                    IERC20(charges_[i].asset).transferFrom(
-                        msg.sender,
-                        address(this),
-                        charges_[i].value
-                    )
-                );
-            }
-
-            chargedPools_[i] == Pool.RELAY
-                ? _chargeRelayPool(charges_[i])
-                : _chargeOperationsPool(charges_[i]);
-        }
     }
 
     function _setTradingStrategy(ITradingStrategy strategy_) internal {
@@ -159,6 +150,7 @@ contract CopyTrader is ICopyTrader, CopyTraderManager, CopyTraderRelaysHandler {
 
     /// ===== GETTERS ===== ///
 
+    // TODO remove this debugging function.
     function tokenAmountFromWei(address token, uint256 weiToConvert)
         external
         view
@@ -168,6 +160,7 @@ contract CopyTrader is ICopyTrader, CopyTraderManager, CopyTraderRelaysHandler {
         return PricesLib.tokenAmountFromWei(token, weiToConvert);
     }
 
+    // TODO remove this debugging function.
     function poolSize(Pool pool_, address asset_)
         external
         view
@@ -178,6 +171,7 @@ contract CopyTrader is ICopyTrader, CopyTraderManager, CopyTraderRelaysHandler {
             pool_ == Pool.RELAY ? relayPools[asset_] : operationsPools[asset_];
     }
 
+    // TODO remove this debugging function.
     function isRLPSignatureCorrect(
         bytes calldata transaction_,
         uint8 v_,
