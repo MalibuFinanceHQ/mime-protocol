@@ -14,6 +14,18 @@ abstract contract CopyTraderRelaysHandler {
     using SafeMath for uint256;
 
     /**
+     * @dev division base when calculating relayer reward.
+     * @notice relayer fee is the gas used by the tx converted to eth,
+     * and then to the requested token + a % fee, the base of that percentage is 100000.
+     */
+    uint256 public constant RELAYER_FEE_BASE = 100000;
+
+    /**
+     * @dev relayer fee.
+     */
+    uint256 public relayerFee;
+
+    /**
      * @dev map(poolAsset => poolSize).
      * This mapping contains the amount of some tokens locked, in order to execute txns.
      */
@@ -28,6 +40,14 @@ abstract contract CopyTraderRelaysHandler {
      * @dev protection against relaying multiple different transactions within the same block.
      */
     uint256 public lastRelayBlockNumber;
+
+    /**
+     * @dev sets relayer fee.
+     * @notice consider if emitting an event would make sense.
+     */
+    function _setRelayerFee(uint256 fee_) internal {
+        relayerFee = fee_;
+    }
 
     function _isRLPSignatureCorrect(
         bytes calldata transaction_,

@@ -90,6 +90,10 @@ contract CopyTrader is ICopyTrader, CopyTraderManager, CopyTraderRelaysHandler {
         _handleMultipleCharges(charges_, chargedPools_);
     }
 
+    function setRelayerFee(uint256 fee_) external onlyManager() {
+        _setRelayerFee(fee_);
+    }
+
     /// ===== INTERNAL STATE CHANGERS ===== ///
 
     function _follow(address trader_) internal {
