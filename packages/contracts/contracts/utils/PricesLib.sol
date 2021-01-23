@@ -7,8 +7,6 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../interfaces/uniswap/IUniswapV2Factory.sol";
 import "../interfaces/uniswap/IUniswapV2Pair.sol";
 
-import "hardhat/console.sol";
-
 library PricesLib {
     using SafeMath for uint256;
 
@@ -19,7 +17,7 @@ library PricesLib {
         0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     function tokenAmountFromWei(address token, uint256 weiToConvert)
-        internal
+        public
         view
         returns (uint256 tokenAmount)
     {

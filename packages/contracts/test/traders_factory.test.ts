@@ -29,6 +29,8 @@ import {
   TradersFactory__factory,
   TradingStrategy,
   TradingStrategy__factory,
+  PricesLib,
+  PricesLib__factory,
 } from '../typechain';
 
 import {
@@ -43,6 +45,7 @@ describe('TradersFactory: test', function () {
   let factory: TradersFactory;
   let tradingStrategy: TradingStrategy;
   let copyTrader: CopyTrader;
+  let pricesLib: PricesLib;
 
   const followed = createIdentity();
 
@@ -53,9 +56,19 @@ describe('TradersFactory: test', function () {
       await ethers.getContractFactory('TradingStrategy')
     )).deploy();
 
-    const copyTraderBytecodeOnchainInstance = await (<CopyTrader__factory>(
-      await ethers.getContractFactory('CopyTrader')
+    pricesLib = await (<PricesLib__factory>(
+      await ethers.getContractFactory('PricesLib')
     )).deploy();
+
+    const copyTraderBytecodeOnchainInstance = await (<CopyTrader__factory>(
+      await ethers.getContractFactory(
+        'CopyTrader',
+        {
+          libraries: {
+            PricesLib: pricesLib.address,
+          }
+        }
+      ))).deploy();
 
     factory = await (<TradersFactory__factory>(
       await ethers.getContractFactory('TradersFactory')

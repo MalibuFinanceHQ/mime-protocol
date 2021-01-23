@@ -71,9 +71,4 @@ interface ICopyTrader {
      * to be made only by a relayer.
      */
     function setFeesPaymentsAsset(address asset_) external;
-
-    function tokenAmountFromWei(address token, uint256 weiToConvert)
-        external
-        view
-        returns (uint256 tokenAmount);
 }
