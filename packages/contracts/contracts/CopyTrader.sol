@@ -244,8 +244,13 @@ contract CopyTrader is ICopyTrader, CopyTraderManager {
 
     /// ===== GETTERS ===== ///
 
-    function fetchLastPrice() external view override returns (uint256) {
-        return PricesLib.getLastPrice(feesPaymentsAsset);
+    function tokenAmountFromWei(address token, uint256 weiToConvert)
+        external
+        view
+        override
+        returns (uint256 tokenAmount)
+    {
+        return PricesLib.tokenAmountFromWei(token, weiToConvert);
     }
 
     function poolSize(Pool pool_, address asset_)

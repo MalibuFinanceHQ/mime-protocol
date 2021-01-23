@@ -1,5 +1,6 @@
 import { ethers } from 'hardhat';
 import { Signer } from 'ethers';
+import { parseEther, formatEther } from 'ethers/lib/utils';
 import { expect } from 'chai';
 import {
   CopyTrader,
@@ -53,16 +54,16 @@ describe('RelayerRefunds: test', () => {
   });
 
   step(
-    'Should set the feesPaymentsAsset variable and fetch last price',
+    'Should set the feesPaymentsAsset variable and get required token amount from wei',
     async () => {
-      const uniswapDAIWETHPair = '0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11';
-      await copyTrader.setFeesPaymentsAsset(uniswapDAIWETHPair);
+      const TRB_CONTRACT = '0x0Ba45A8b5d5575935B8158a88C631E9F9C95a2e5';
+      await copyTrader.setFeesPaymentsAsset(TRB_CONTRACT);
+      expect(await copyTrader.feesPaymentsAsset()).to.equal(TRB_CONTRACT);
 
-      expect(await copyTrader.feesPaymentsAsset()).to.equal(uniswapDAIWETHPair);
-
-      const lastPrice = await copyTrader.fetchLastPrice();
-      console.log(`Last price: ${lastPrice.toString()} DAI`);
-      expect(lastPrice).to.not.be.null;
+      const weiAmount = parseEther("0.5");
+      const tokenAmount = await copyTrader.tokenAmountFromWei(TRB_CONTRACT, weiAmount);
+      console.log(`Token amount: ${formatEther(tokenAmount)} Ξ`);
+      expect(tokenAmount).to.not.be.null;
     },
   );
 });

@@ -13,7 +13,9 @@ if (!ALCHEMY_API_KEY) throw new Error('No ALCHEMY_API_KEY specified in .env');
 
 const config: HardhatUserConfig = {
   solidity: {
-    compilers: [{ version: '0.7.5' }],
+    compilers: [
+      { version: '0.7.5' }
+    ],
   },
   networks: {
     hardhat: {
