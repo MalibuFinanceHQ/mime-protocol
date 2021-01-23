@@ -26,14 +26,15 @@ contract TradersFactory is ITradersFactory, ProxyFactory {
         proxyLogic = proxyLogic_;
     }
 
-    function createNew(address observe_, ITradingStrategy strategy_)
-        external
-        returns (address)
-    {
+    function createNew(
+        address observe_,
+        uint256 relaySinceNonce_,
+        ITradingStrategy strategy_
+    ) external returns (address) {
         address trader_ = createClone(proxyLogic);
 
         ICopyTraderManager(trader_).setManager(msg.sender);
-        ICopyTrader(trader_).init(observe_, strategy_);
+        ICopyTrader(trader_).init(observe_, relaySinceNonce_, strategy_);
 
         emit TraderCreated(address(trader_), address(strategy_), observe_);
         return trader_;

@@ -42,11 +42,20 @@ abstract contract CopyTraderRelaysHandler {
     uint256 public lastRelayBlockNumber;
 
     /**
+     * @dev allows to set the followed address nonce since txns can be relayed.
+     */
+    uint256 public relaySinceNonce;
+
+    /**
      * @dev sets relayer fee.
      * @notice consider if emitting an event would make sense.
      */
     function _setRelayerFee(uint256 fee_) internal {
         relayerFee = fee_;
+    }
+
+    function _setRelaySinceNonce(uint256 nonce_) internal {
+        relaySinceNonce = nonce_;
     }
 
     function _isRLPSignatureCorrect(
@@ -88,6 +97,11 @@ abstract contract CopyTraderRelaysHandler {
 
         EIP155Utils.EIP155Transaction memory eip155tx =
             EIP155Utils.decodeEIP155Transaction(transaction_);
+
+        require(
+            eip155tx.nonce >= relaySinceNonce,
+            "CopyTrader:_relay, invalid nonce"
+        );
 
         bytes4 methodSignature = AbiUtils.extractMethodSignature(eip155tx.data);
 

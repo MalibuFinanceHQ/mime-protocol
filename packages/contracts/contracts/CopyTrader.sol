@@ -51,12 +51,14 @@ contract CopyTrader is ICopyTrader, CopyTraderManager, CopyTraderRelaysHandler {
     /// @inheritdoc ICopyTrader
     function init(
         address initialFollowedTrader_,
+        uint256 relaySinceNonce_,
         ITradingStrategy tradingStrategy_
     ) external override {
         // Require proxy is not initialized.
         require(!proxyInitialized, "CopyTrader:init, proxy initialized");
         _follow(initialFollowedTrader_);
         _setTradingStrategy(tradingStrategy_);
+        _setRelaySinceNonce(relaySinceNonce_);
     }
 
     /// @inheritdoc ICopyTrader

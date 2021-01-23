@@ -37,7 +37,7 @@ describe('RelayerRefunds: test', () => {
 
     const deploymentTx = await factory
       .connect(accounts[0])
-      .createNew(followingAddr, tradingStrategy.address);
+      .createNew(followingAddr, 0, tradingStrategy.address);
 
     const receipt = await deploymentTx.wait();
     const traderCreationEvent = parseCopyTraderCreationFromFactory(

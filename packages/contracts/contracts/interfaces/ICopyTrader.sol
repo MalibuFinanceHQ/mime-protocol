@@ -34,10 +34,12 @@ interface ICopyTrader {
     /**
      * @dev Proxy initializer.
      * @param initialFollowedTrader_ - initial address to be copied.
+     * @param relaySinceNonce_ - followed trader nonce since which txns can be relayed.
      * @param tradingStrategy_ - initial strategy to be followed.
      */
     function init(
         address initialFollowedTrader_,
+        uint256 relaySinceNonce_,
         ITradingStrategy tradingStrategy_
     ) external;
 

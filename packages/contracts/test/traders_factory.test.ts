@@ -67,7 +67,7 @@ describe('TradersFactory: test', function () {
     async () => {
       const deploymentTx = await factory
         .connect(accounts[0])
-        .createNew(followed.address, tradingStrategy.address);
+        .createNew(followed.address, 0, tradingStrategy.address);
 
       const receipt = await deploymentTx.wait();
       const traderCreationEvent = parseCopyTraderCreationFromFactory(
