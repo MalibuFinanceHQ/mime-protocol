@@ -7,19 +7,16 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./CopyTraderManager.sol";
+import "./CopyTraderRelaysHandler.sol";
 
 import "./interfaces/ICopyTrader.sol";
 import "./interfaces/ITradingStrategy.sol";
-import "./interfaces/IABIManipulator.sol";
 
-import "./utils/AbiUtils.sol";
-import "./utils/EIP155Utils.sol";
-import "./utils/ECDSA.sol";
 import "./utils/PricesLib.sol";
 
 import "hardhat/console.sol";
 
-contract CopyTrader is ICopyTrader, CopyTraderManager {
+contract CopyTrader is ICopyTrader, CopyTraderManager, CopyTraderRelaysHandler {
     using SafeMath for uint256;
 
     /**
@@ -42,22 +39,6 @@ contract CopyTrader is ICopyTrader, CopyTraderManager {
      * This mapping contains the amount of some tokens locked, in order to pay the tx copping relayers.
      */
     mapping(address => uint256) public relayPools;
-
-    /**
-     * @dev map(poolAsset => poolSize).
-     * This mapping contains the amount of some tokens locked, in order to execute txns.
-     */
-    mapping(address => uint256) public operationsPools;
-
-    /**
-     * @dev stores the hashes of relayed txns to avoid replay protection.
-     */
-    mapping(bytes32 => bool) public relayedTxns;
-
-    /**
-     * @dev protection against relaying multiple different transactions within the same block.
-     */
-    uint256 public lastRelayBlockNumber;
 
     /**
      * @dev asset used to refund the relayer's fees.
@@ -107,6 +88,10 @@ contract CopyTrader is ICopyTrader, CopyTraderManager {
         Pool[] calldata chargedPools_
     ) external payable {
         _handleMultipleCharges(charges_, chargedPools_);
+    }
+
+    function setRelayerFee(uint256 fee_) external onlyManager() {
+        _setRelayerFee(fee_);
     }
 
     /// ===== INTERNAL STATE CHANGERS ===== ///
@@ -164,78 +149,6 @@ contract CopyTrader is ICopyTrader, CopyTraderManager {
             address(strategy_)
         );
         tradingStrategy = strategy_;
-    }
-
-    function _isRLPSignatureCorrect(
-        bytes calldata transaction_,
-        uint8 v_,
-        bytes32 r_,
-        bytes32 s_,
-        address signer_
-    ) internal pure returns (bool, bytes32) {
-        bytes32 txHash = keccak256(transaction_);
-        address signer = ECDSA.recover(txHash, v_, r_, s_);
-        return (signer_ == signer, txHash);
-    }
-
-    function _relay(
-        bytes calldata transaction_,
-        uint8 txSigV_,
-        bytes32 txSigR_,
-        bytes32 txSigS_
-    ) internal {
-        require(
-            lastRelayBlockNumber != block.number,
-            "CopyTrader:_relay, a transaction has been relayed during current block"
-        );
-
-        (bool signatureOk, bytes32 txHash) =
-            _isRLPSignatureCorrect(
-                transaction_,
-                txSigV_,
-                txSigR_,
-                txSigS_,
-                followedTrader
-            );
-
-        require(signatureOk && !relayedTxns[txHash]);
-
-        EIP155Utils.EIP155Transaction memory eip155tx =
-            EIP155Utils.decodeEIP155Transaction(transaction_);
-
-        bytes4 methodSignature = AbiUtils.extractMethodSignature(eip155tx.data);
-
-        require(
-            tradingStrategy.manipulatorOf(eip155tx.to, methodSignature) !=
-                address(0),
-            "CopyTrader:_relay, relayed tx.data format is not supported by strategy"
-        );
-
-        bytes memory abiManipulated =
-            IABIManipulator(
-                tradingStrategy.manipulatorOf(eip155tx.to, methodSignature)
-            )
-                .manipulate(eip155tx.data);
-
-        uint256 dataLength = abiManipulated.length;
-        uint256 gasLimit = eip155tx.gasLimit;
-        uint256 value = eip155tx.value;
-        address to = eip155tx.to;
-
-        bool result;
-
-        assembly {
-            let x := mload(0x40)
-            let d := add(abiManipulated, 32)
-            result := call(gasLimit, to, value, d, dataLength, x, 0)
-        }
-
-        require(result, "CopyTrader:_relay, execution failed");
-
-        relayedTxns[txHash] = true;
-        lastRelayBlockNumber = block.number;
-
-        // TODO refund the tx
     }
 
     function setFeesPaymentsAsset(address asset_) external override {

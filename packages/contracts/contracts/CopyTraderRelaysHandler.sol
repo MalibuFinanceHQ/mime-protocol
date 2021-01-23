@@ -1,0 +1,126 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.7.5;
+
+import "@openzeppelin/contracts/math/SafeMath.sol";
+
+import "./utils/ECDSA.sol";
+import "./utils/EIP155Utils.sol";
+import "./utils/AbiUtils.sol";
+
+import "./interfaces/ITradingStrategy.sol";
+import "./interfaces/IABIManipulator.sol";
+
+abstract contract CopyTraderRelaysHandler {
+    using SafeMath for uint256;
+
+    /**
+     * @dev division base when calculating relayer reward.
+     * @notice relayer fee is the gas used by the tx converted to eth,
+     * and then to the requested token + a % fee, the base of that percentage is 100000.
+     */
+    uint256 public constant RELAYER_FEE_BASE = 100000;
+
+    /**
+     * @dev relayer fee.
+     */
+    uint256 public relayerFee;
+
+    /**
+     * @dev map(poolAsset => poolSize).
+     * This mapping contains the amount of some tokens locked, in order to execute txns.
+     */
+    mapping(address => uint256) public operationsPools;
+
+    /**
+     * @dev stores the hashes of relayed txns to avoid replay protection.
+     */
+    mapping(bytes32 => bool) public relayedTxns;
+
+    /**
+     * @dev protection against relaying multiple different transactions within the same block.
+     */
+    uint256 public lastRelayBlockNumber;
+
+    /**
+     * @dev sets relayer fee.
+     * @notice consider if emitting an event would make sense.
+     */
+    function _setRelayerFee(uint256 fee_) internal {
+        relayerFee = fee_;
+    }
+
+    function _isRLPSignatureCorrect(
+        bytes calldata transaction_,
+        uint8 v_,
+        bytes32 r_,
+        bytes32 s_,
+        address signer_
+    ) internal pure returns (bool, bytes32) {
+        bytes32 txHash = keccak256(transaction_);
+        address signer = ECDSA.recover(txHash, v_, r_, s_);
+        return (signer_ == signer, txHash);
+    }
+
+    function _relay(
+        bytes calldata transaction_,
+        address correctSigner_,
+        ITradingStrategy followedStrategy_,
+        uint8 txSigV_,
+        bytes32 txSigR_,
+        bytes32 txSigS_
+    ) internal returns (uint256 gasUsed) {
+        uint256 beforeRelayAvailableGas = gasleft();
+        require(
+            lastRelayBlockNumber != block.number,
+            "CopyTrader:_relay, a transaction has been relayed during current block"
+        );
+
+        (bool signatureOk, bytes32 txHash) =
+            _isRLPSignatureCorrect(
+                transaction_,
+                txSigV_,
+                txSigR_,
+                txSigS_,
+                correctSigner_
+            );
+
+        require(signatureOk && !relayedTxns[txHash]);
+
+        EIP155Utils.EIP155Transaction memory eip155tx =
+            EIP155Utils.decodeEIP155Transaction(transaction_);
+
+        bytes4 methodSignature = AbiUtils.extractMethodSignature(eip155tx.data);
+
+        require(
+            followedStrategy_.manipulatorOf(eip155tx.to, methodSignature) !=
+                address(0),
+            "CopyTrader:_relay, relayed tx.data format is not supported by strategy"
+        );
+
+        bytes memory abiManipulated =
+            IABIManipulator(
+                followedStrategy_.manipulatorOf(eip155tx.to, methodSignature)
+            )
+                .manipulate(eip155tx.data);
+
+        uint256 dataLength = abiManipulated.length;
+        uint256 gasLimit = eip155tx.gasLimit;
+        uint256 value = eip155tx.value;
+        address to = eip155tx.to;
+
+        bool result;
+
+        assembly {
+            let x := mload(0x40)
+            let d := add(abiManipulated, 32)
+            result := call(gasLimit, to, value, d, dataLength, x, 0)
+        }
+
+        require(result, "CopyTrader:_relay, execution failed");
+
+        relayedTxns[txHash] = true;
+        lastRelayBlockNumber = block.number;
+
+        return beforeRelayAvailableGas.sub(gasleft());
+    }
+}
