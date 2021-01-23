@@ -4,10 +4,8 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import 'reflect-metadata';
 import { createConnection } from 'typeorm';
-// import { User } from './entity/User';
 
 createConnection().then(connection => {
-  // const userRepository = connection.getRepository(User);
   const app = express();
   app.use(express.json());
 
@@ -20,4 +18,3 @@ createConnection().then(connection => {
     console.log(`Server started at http://localhost:${port}`);
   });
 });
-

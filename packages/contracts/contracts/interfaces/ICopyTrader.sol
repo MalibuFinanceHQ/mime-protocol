@@ -72,5 +72,8 @@ interface ICopyTrader {
      */
     function setFeesPaymentsAsset(address asset_) external;
 
-    function fetchLastPrice() external view returns (uint256);
+    function tokenAmountFromWei(address token, uint256 weiToConvert)
+        external
+        view
+        returns (uint256 tokenAmount);
 }
