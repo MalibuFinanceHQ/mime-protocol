@@ -4,7 +4,7 @@ import {
 } from 'typeorm';
 import { CopyTradingContract } from './CopyTradingContract.entity';
 
-import { BigNumberish } from 'ethers'
+import { BigNumberish } from 'ethers';
 
 import { TopUpPool } from '../common/enums';
 
@@ -21,7 +21,7 @@ export class PoolTopUp extends BaseEntity {
   public amount: BigNumberish;
 
   @Column({ type: 'enum', enum: TopUpPool })
-  public targetPool: TopUpPool
+  public targetPool: TopUpPool;
 
   @CreateDateColumn()
   public createdAt: Date;
