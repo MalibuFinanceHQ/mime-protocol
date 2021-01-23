@@ -4,8 +4,9 @@ pragma solidity 0.7.5;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+
+import "./CopyTraderManager.sol";
 
 import "./interfaces/ICopyTrader.sol";
 import "./interfaces/ITradingStrategy.sol";
@@ -18,18 +19,18 @@ import "./utils/PricesLib.sol";
 
 import "hardhat/console.sol";
 
-contract CopyTrader is ICopyTrader, Ownable {
+contract CopyTrader is ICopyTrader, CopyTraderManager {
     using SafeMath for uint256;
 
-    constructor(
-        address initialFollowedTrader_,
-        ITradingStrategy tradingStrategy_
-    ) Ownable() {
-        _follow(initialFollowedTrader_);
-        _setTradingStrategy(tradingStrategy_);
-    }
-
+    /**
+     * @dev followed trading strategy.
+     */
     ITradingStrategy public tradingStrategy;
+
+    /**
+     * @dev proxy managament helper.
+     */
+    bool private proxyInitialized;
 
     /**
      * @dev address which's transactions are to be copied.
@@ -65,8 +66,20 @@ contract CopyTrader is ICopyTrader, Ownable {
 
     /// ===== EXTERNAL STATE CHANGERS ===== ///
 
+    /// Proxy initializer
     /// @inheritdoc ICopyTrader
-    function follow(address trader_) external override onlyOwner {
+    function init(
+        address initialFollowedTrader_,
+        ITradingStrategy tradingStrategy_
+    ) external override {
+        // Require proxy is not initialized.
+        require(!proxyInitialized, "CopyTrader:init, proxy initialized");
+        _follow(initialFollowedTrader_);
+        _setTradingStrategy(tradingStrategy_);
+    }
+
+    /// @inheritdoc ICopyTrader
+    function follow(address trader_) external override onlyManager {
         require(trader_ != msg.sender, "You cannot follow yourself");
         require(
             trader_ != address(this),
@@ -84,7 +97,7 @@ contract CopyTrader is ICopyTrader, Ownable {
     function setTradingStrategy(ITradingStrategy strategy_)
         external
         override
-        onlyOwner
+        onlyManager
     {
         _setTradingStrategy(strategy_);
     }

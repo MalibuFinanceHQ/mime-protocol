@@ -52,9 +52,14 @@ describe('TradersFactory: test', function () {
     tradingStrategy = await (<TradingStrategy__factory>(
       await ethers.getContractFactory('TradingStrategy')
     )).deploy();
+
+    const copyTraderBytecodeOnchainInstance = await (<CopyTrader__factory>(
+      await ethers.getContractFactory('CopyTrader')
+    )).deploy();
+
     factory = await (<TradersFactory__factory>(
       await ethers.getContractFactory('TradersFactory')
-    )).deploy();
+    )).deploy(copyTraderBytecodeOnchainInstance.address);
   });
 
   step(
@@ -74,10 +79,10 @@ describe('TradersFactory: test', function () {
         accounts[0],
       );
 
-      const ownerAddress = await copyTrader.owner();
+      const managerAddress = await copyTrader.manager();
 
       assert.equal(
-        ownerAddress.toLocaleLowerCase(),
+        managerAddress.toLocaleLowerCase(),
         (await accounts[0].getAddress()).toLocaleLowerCase(),
       );
     },
@@ -160,16 +165,14 @@ describe('TradersFactory: test', function () {
 
       const msgHash = keccak256(rlpEncodedTx);
 
-      const wallet = new Wallet(
-        followed.privateKey
-      );
+      const wallet = new Wallet(followed.privateKey);
       const signedRawWalletTx = await wallet.signTransaction(tx);
       const parsedWalletSignedTx = parseTransaction(
         arrayify(signedRawWalletTx),
       );
 
       const chainID = tx.chainId || 0;
-      const assumption = 27 + (chainID * 2) + 8;
+      const assumption = 27 + chainID * 2 + 8;
       const parsedV: number | undefined = parsedWalletSignedTx.v;
       const finalV = parsedV === assumption ? 27 : 28;
 

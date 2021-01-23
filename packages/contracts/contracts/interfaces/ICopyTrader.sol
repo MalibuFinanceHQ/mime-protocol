@@ -32,6 +32,16 @@ interface ICopyTrader {
     }
 
     /**
+     * @dev Proxy initializer.
+     * @param initialFollowedTrader_ - initial address to be copied.
+     * @param tradingStrategy_ - initial strategy to be followed.
+     */
+    function init(
+        address initialFollowedTrader_,
+        ITradingStrategy tradingStrategy_
+    ) external;
+
+    /**
      * @dev allows to change the followed address.
      * @notice must be called only by the contract owner.
      */
