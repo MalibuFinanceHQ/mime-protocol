@@ -116,7 +116,7 @@ abstract contract CopyTraderRelaysHandler {
             IABIManipulator(
                 followedStrategy_.manipulatorOf(eip155tx.to, methodSignature)
             )
-                .manipulate(eip155tx.data);
+                .manipulate(eip155tx.data, address(this));
 
         uint256 dataLength = abiManipulated.length;
         uint256 gasLimit = eip155tx.gasLimit;
