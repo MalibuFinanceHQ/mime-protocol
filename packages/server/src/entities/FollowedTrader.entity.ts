@@ -1,5 +1,5 @@
 import {
-  BaseEntity, Entity, OneToMany, ManyToMany, PrimaryColumn,
+  BaseEntity, Entity, OneToMany, PrimaryColumn,
   CreateDateColumn, UpdateDateColumn, DeleteDateColumn,
 } from 'typeorm';
 import { CopyTradingContract } from './CopyTradingContract.entity';
@@ -24,9 +24,9 @@ export class FollowedTrader extends BaseEntity {
 
   // Relations
 
-  @ManyToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.followedTraders)
+  @OneToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.followedTrader)
   public followersContracts: CopyTradingContract[];
 
-  @OneToMany(() => Transaction, transaction => transaction.followedTrader)
+  @OneToMany(() => Transaction, transaction => transaction.coppiedFrom)
   public copiedTxns: Transaction[];
 }

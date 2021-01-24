@@ -1,3 +1,6 @@
-import { Indexer } from './indexer.type';
+import { Repository } from 'typeorm';
+import { TradersFactory } from '../../../contracts/typechain'
+import { CopyTradingContract } from '../entities/CopyTradingContract.entity';
 
-export const copyTradersIndexer: Indexer = async () => { };
+
+export async function copyTradersIndexer(eventsSourceContract: TradersFactory, repository: Repository<CopyTradingContract>) { };

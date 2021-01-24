@@ -1,6 +1,6 @@
 import {
   BaseEntity, Column, CreateDateColumn, DeleteDateColumn,
-  Entity, JoinColumn, JoinTable,
+  Entity,
   OneToMany, ManyToMany, ManyToOne, PrimaryColumn, UpdateDateColumn
 } from 'typeorm';
 import { FollowedTrader } from './FollowedTrader.entity';
@@ -35,21 +35,18 @@ export class CopyTradingContract extends BaseEntity {
 
   // Relations
 
-  @ManyToOne(() => User, user => user.copyTradingContracts)
-  @JoinColumn()
+  @ManyToOne(() => User, user => user.copyTradingContracts, { nullable: true })
   public owner: User;
 
   @ManyToOne(() => Strategy, strategy => strategy.copyTradingContracts)
-  @JoinTable()
   public strategy: Strategy;
 
-  @ManyToMany(() => FollowedTrader)
-  @JoinTable()
-  public followedTraders: FollowedTrader[];
+  @ManyToOne(() => FollowedTrader)
+  public followedTrader: FollowedTrader;
 
   @OneToMany(() => PoolTopUp, poolTopUp => poolTopUp.copyTradingContract)
   public poolTopUps: PoolTopUp[];
 
-  @OneToMany(() => Transaction, transaction => transaction.copyTradingContract)
-  public relayedTxns: Transaction[];
+  @ManyToMany(() => Transaction, transaction => transaction.copiedBy)
+  public coppiedTxns: Transaction[];
 }

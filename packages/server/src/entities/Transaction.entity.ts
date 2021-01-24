@@ -1,6 +1,6 @@
 import {
   BaseEntity, Column, Entity, ManyToOne, PrimaryColumn,
-  CreateDateColumn, UpdateDateColumn, DeleteDateColumn,
+  CreateDateColumn, UpdateDateColumn, DeleteDateColumn, ManyToMany, JoinTable,
 } from 'typeorm';
 import { CopyTradingContract } from './CopyTradingContract.entity';
 import { FollowedTrader } from './FollowedTrader.entity';
@@ -38,9 +38,10 @@ export class Transaction extends BaseEntity {
 
   // *From* whom the *original* tx is copied.
   @ManyToOne(() => FollowedTrader, followedTrader => followedTrader.copiedTxns)
-  public followedTrader: FollowedTrader;
+  public coppiedFrom: FollowedTrader;
 
   // *For* whom the *relayed* tx is relayed.
-  @ManyToOne(() => CopyTradingContract, copyTradingContract => copyTradingContract.relayedTxns)
-  public copyTradingContract: CopyTradingContract;
+  @ManyToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.coppiedTxns)
+  @JoinTable()
+  public copiedBy: CopyTradingContract[];
 }

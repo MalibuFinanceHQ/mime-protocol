@@ -16,7 +16,7 @@ export = {
   username: DB_USERNAME,
   password: DB_PASSWORD,
   database: DB_NAME,
-  entities: ['src/entity/*.ts'],
+  entities: ['src/entities/*.ts'],
   logging: false,
   synchronize: true,
   migrationsRun: true

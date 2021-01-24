@@ -1,5 +1,5 @@
 import {
-    Entity, JoinColumn, OneToMany, PrimaryColumn,
+    Entity, OneToMany, PrimaryColumn,
     CreateDateColumn, DeleteDateColumn, UpdateDateColumn, BaseEntity,
 } from 'typeorm';
 import { CopyTradingContract } from './CopyTradingContract.entity';
@@ -25,6 +25,5 @@ export class User extends BaseEntity {
     // Relations
 
     @OneToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.owner)
-    @JoinColumn()
-    copyTradingContracts: CopyTradingContract[];
+    public copyTradingContracts: CopyTradingContract[];
 }
