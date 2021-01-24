@@ -107,14 +107,14 @@ abstract contract CopyTraderRelaysHandler {
         bytes4 methodSignature = AbiUtils.extractMethodSignature(eip155tx.data);
 
         require(
-            followedStrategy_.manipulatorOf(eip155tx.to, methodSignature) !=
+            followedStrategy_.manipulators(eip155tx.to, methodSignature) !=
                 address(0),
             "CopyTrader:_relay, relayed tx.data format is not supported by strategy"
         );
 
         bytes memory abiManipulated =
             IABIManipulator(
-                followedStrategy_.manipulatorOf(eip155tx.to, methodSignature)
+                followedStrategy_.manipulators(eip155tx.to, methodSignature)
             )
                 .manipulate(eip155tx.data, address(this));
 

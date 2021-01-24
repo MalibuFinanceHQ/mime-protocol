@@ -9,22 +9,13 @@ contract TradingStrategy is ITradingStrategy, Ownable {
     constructor() Ownable() {}
 
     // Contract/Protocol/CopyTrader.recipient => method id/function selector => abi manipulation handler.
-    mapping(address => mapping(bytes4 => address)) _manipulators;
+    mapping(address => mapping(bytes4 => address)) public override manipulators;
 
     function setManipulator(
-        address copiedTradesRecipient,
-        bytes4 identifier,
-        address manipulator
+        address protocol_,
+        bytes4 identifier_,
+        address manipulator_
     ) external override onlyOwner {
-        _manipulators[copiedTradesRecipient][identifier] = manipulator;
-    }
-
-    function manipulatorOf(address destination, bytes4 identifier)
-        external
-        view
-        override
-        returns (address)
-    {
-        return _manipulators[destination][identifier];
+        manipulators[protocol_][identifier_] = manipulator_;
     }
 }

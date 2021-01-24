@@ -9,7 +9,7 @@ interface ITradingStrategy {
         address manipulator
     ) external;
 
-    function manipulatorOf(address destination, bytes4 identifier)
+    function manipulators(address destination, bytes4 identifier)
         external
         view
         returns (address);
