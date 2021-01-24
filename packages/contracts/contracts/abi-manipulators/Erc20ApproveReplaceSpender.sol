@@ -3,7 +3,7 @@ pragma solidity 0.7.5;
 import "../interfaces/IABIManipulator.sol";
 import "../utils/BytesLib.sol";
 
-contract ERC20IncreaseAllowanceReplaceSpenderABIManipulator is IABIManipulator {
+contract ReplaceERC20ApproveSpenderManipulator is IABIManipulator {
     using BytesLib for bytes;
 
     /**

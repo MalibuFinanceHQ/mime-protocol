@@ -14,7 +14,7 @@ import {
 import { step } from 'mocha-steps';
 import { parseCopyTraderCreationFromFactory } from './utils/logs-parsers';
 
-describe('RelayerRefunds: test', () => {
+describe('PricesLib: test', () => {
   let accounts: Signer[];
   let copyTrader: CopyTrader;
   let tradingStrategy: TradingStrategy;
@@ -33,14 +33,12 @@ describe('RelayerRefunds: test', () => {
 
     // copy trader contract bytecode instance.
     const copyTraderBytecodeOnchainInstance = await (<CopyTrader__factory>(
-      await ethers.getContractFactory(
-        'CopyTrader',
-        {
-          libraries: {
-            PricesLib: pricesLib.address,
-          }
-        }
-      ))).deploy();
+      await ethers.getContractFactory('CopyTrader', {
+        libraries: {
+          PricesLib: pricesLib.address,
+        },
+      })
+    )).deploy();
 
     const factory = await (<TradersFactory__factory>(
       await ethers.getContractFactory('TradersFactory')
@@ -74,8 +72,11 @@ describe('RelayerRefunds: test', () => {
       const feesPaymentsAsset = await copyTrader.feesPaymentsAsset();
       expect(feesPaymentsAsset).to.equal(TRB_CONTRACT);
 
-      const weiAmount = parseEther("0.5");
-      const tokenAmount = await pricesLib.tokenAmountFromWei(TRB_CONTRACT, weiAmount);
+      const weiAmount = parseEther('0.5');
+      const tokenAmount = await pricesLib.tokenAmountFromWei(
+        TRB_CONTRACT,
+        weiAmount,
+      );
       console.log(`Token amount: ${formatEther(tokenAmount)} Ξ`);
       expect(tokenAmount).to.not.be.null;
     },

@@ -1,4 +1,3 @@
-//@ts-ignore
 import { ethers } from 'hardhat';
 import {
   Signer,
@@ -21,8 +20,7 @@ import { createIdentity } from 'eth-crypto';
 
 import { step } from 'mocha-steps';
 import { assert } from 'chai';
-import { before } from 'mocha'
-
+import { before } from 'mocha';
 
 import {
   CopyTrader,
@@ -63,14 +61,12 @@ describe('TradersFactory: test', function () {
     )).deploy();
 
     const copyTraderBytecodeOnchainInstance = await (<CopyTrader__factory>(
-      await ethers.getContractFactory(
-        'CopyTrader',
-        {
-          libraries: {
-            PricesLib: pricesLib.address,
-          }
-        }
-      ))).deploy();
+      await ethers.getContractFactory('CopyTrader', {
+        libraries: {
+          PricesLib: pricesLib.address,
+        },
+      })
+    )).deploy();
 
     factory = await (<TradersFactory__factory>(
       await ethers.getContractFactory('TradersFactory')

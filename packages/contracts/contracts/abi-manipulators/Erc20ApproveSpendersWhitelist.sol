@@ -5,10 +5,7 @@ import "../utils/BytesLib.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ERC20IncreaseAllowanceSpenderCheckABIManipulator is
-    IABIManipulator,
-    Ownable
-{
+contract CheckERC20ApproveSpenderManipulator is IABIManipulator, Ownable {
     using BytesLib for bytes;
 
     mapping(address => bool) public whitelistedSpenders;
