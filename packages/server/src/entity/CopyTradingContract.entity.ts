@@ -39,9 +39,9 @@ export class CopyTradingContract extends BaseEntity {
   @JoinColumn()
   public owner: User;
 
-  @ManyToMany(() => Strategy)
+  @ManyToOne(() => Strategy, strategy => strategy.copyTradingContracts)
   @JoinTable()
-  public strategies: Strategy[];
+  public strategy: Strategy;
 
   @ManyToMany(() => FollowedTrader)
   @JoinTable()

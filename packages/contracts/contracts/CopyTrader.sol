@@ -151,16 +151,6 @@ contract CopyTrader is
     /// ===== GETTERS ===== ///
 
     // TODO remove this debugging function.
-    function tokenAmountFromWei(address token, uint256 weiToConvert)
-        external
-        view
-        override
-        returns (uint256 tokenAmount)
-    {
-        return PricesLib.tokenAmountFromWei(token, weiToConvert);
-    }
-
-    // TODO remove this debugging function.
     function poolSize(Pool pool_, address asset_)
         external
         view

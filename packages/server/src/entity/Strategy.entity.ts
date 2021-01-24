@@ -1,5 +1,5 @@
 import {
-  BaseEntity, Column, ManyToMany,
+  BaseEntity, Column, OneToMany,
   PrimaryColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Entity
 } from 'typeorm';
 import { CopyTradingContract } from './CopyTradingContract.entity';
@@ -26,6 +26,7 @@ export class Strategy extends BaseEntity {
 
   // Relations
 
-  @ManyToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.strategies)
+  // Contracts using this strategy
+  @OneToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.strategy)
   public copyTradingContracts: CopyTradingContract[];
 }
