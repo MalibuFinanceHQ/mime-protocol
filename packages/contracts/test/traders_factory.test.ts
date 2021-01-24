@@ -21,6 +21,8 @@ import { createIdentity } from 'eth-crypto';
 
 import { step } from 'mocha-steps';
 import { assert } from 'chai';
+import { before } from 'mocha'
+
 
 import {
   CopyTrader,
@@ -49,7 +51,7 @@ describe('TradersFactory: test', function () {
 
   const followed = createIdentity();
 
-  this.beforeAll(async () => {
+  before(async () => {
     accounts = await ethers.getSigners();
 
     tradingStrategy = await (<TradingStrategy__factory>(

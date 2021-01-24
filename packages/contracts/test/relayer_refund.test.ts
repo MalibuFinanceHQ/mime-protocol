@@ -1,4 +1,4 @@
-import { ethers, hardhatArguments } from 'hardhat';
+import { ethers } from 'hardhat';
 import { Signer } from 'ethers';
 import { parseEther, formatEther } from 'ethers/lib/utils';
 import { expect } from 'chai';
