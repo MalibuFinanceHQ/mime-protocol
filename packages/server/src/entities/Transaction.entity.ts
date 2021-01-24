@@ -38,10 +38,10 @@ export class Transaction extends BaseEntity {
 
   // *From* whom the *original* tx is copied.
   @ManyToOne(() => FollowedTrader, followedTrader => followedTrader.copiedTxns)
-  public coppiedFrom: FollowedTrader;
+  public copiedFrom: FollowedTrader;
 
   // *For* whom the *relayed* tx is relayed.
-  @ManyToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.coppiedTxns)
+  @ManyToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.copiedTxns)
   @JoinTable()
   public copiedBy: CopyTradingContract[];
 }

@@ -27,6 +27,6 @@ export class FollowedTrader extends BaseEntity {
   @OneToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.followedTrader)
   public followersContracts: CopyTradingContract[];
 
-  @OneToMany(() => Transaction, transaction => transaction.coppiedFrom)
+  @OneToMany(() => Transaction, transaction => transaction.copiedFrom)
   public copiedTxns: Transaction[];
 }
