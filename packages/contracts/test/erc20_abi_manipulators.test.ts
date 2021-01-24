@@ -7,26 +7,38 @@ import { MaxUint256 } from 'ethers/constants'
 import { before } from 'mocha'
 import { assert } from 'chai'
 
-import { ERC20IncreaseAllowanceABIManipulator, ERC20IncreaseAllowanceABIManipulator__factory } from '../typechain';
+import {
+    ERC20IncreaseAllowanceReplaceSpenderABIManipulator,
+    ERC20IncreaseAllowanceReplaceSpenderABIManipulator__factory,
+    ERC20IncreaseAllowanceSpenderCheckABIManipulator,
+    ERC20IncreaseAllowanceSpenderCheckABIManipulator__factory
+
+
+} from '../typechain';
 
 describe('ERC20 ABI manipulators: test', () => {
     let accounts: Signer[];
-    let approvalsManipulator: ERC20IncreaseAllowanceABIManipulator;
+    let approvalsWithReplacementManipulator: ERC20IncreaseAllowanceReplaceSpenderABIManipulator;
+    let approvalsWhitelistManipulator: ERC20IncreaseAllowanceSpenderCheckABIManipulator;
 
     //@ts-ignore
     before(async () => {
         accounts = await ethers.getSigners();
 
-        approvalsManipulator = await (<ERC20IncreaseAllowanceABIManipulator__factory>(
-            await ethers.getContractFactory('ERC20IncreaseAllowanceABIManipulator')
+        approvalsWithReplacementManipulator = await (<ERC20IncreaseAllowanceReplaceSpenderABIManipulator__factory>(
+            await ethers.getContractFactory('ERC20IncreaseAllowanceReplaceSpenderABIManipulator')
+        )).deploy();
+
+        approvalsWhitelistManipulator = await (<ERC20IncreaseAllowanceSpenderCheckABIManipulator__factory>(
+            await ethers.getContractFactory('ERC20IncreaseAllowanceSpenderCheckABIManipulator')
         )).deploy();
     })
 
-    it("Should manipulate the abi correctly", async () => {
+    it("Should manipulate the abi by replacing spender correctly", async () => {
         const replaceWithAddress = await accounts[0].getAddress()
         const abiToManipulate = '0x095ea7b300000000000000000000000095e6f48254609a6ee006f7d493c8e5fb97094cefffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
-        const manipulated = await approvalsManipulator.manipulate(abiToManipulate, replaceWithAddress)
+        const manipulated = await approvalsWithReplacementManipulator.manipulate(abiToManipulate, replaceWithAddress)
 
         assert.equal(
             manipulated.length, 138
@@ -43,5 +55,15 @@ describe('ERC20 ABI manipulators: test', () => {
         assert.isTrue(
             MaxUint256.eq(`0x${decodedValue}`)
         )
+    })
+
+    it("Should check if abi is returned when address in whitelist", async () => {
+        const whitelistedSpender = '0x95E6F48254609A6ee006F7D493c8e5fB97094ceF'
+        await approvalsWhitelistManipulator.whitelist(whitelistedSpender)
+
+        const abi = '0x095ea7b300000000000000000000000095e6f48254609a6ee006f7d493c8e5fb97094cefffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+        const abiReturned = await approvalsWhitelistManipulator.manipulate(abi, whitelistedSpender)
+
     })
 })
