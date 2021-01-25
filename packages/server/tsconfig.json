@@ -9,8 +9,7 @@
     "strictPropertyInitialization": false,
     "types": [
       "jest",
-      "node",
-      "mocha"
+      "node"
     ]
   },
   "compileOnSave": true,

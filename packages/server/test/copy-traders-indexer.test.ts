@@ -25,15 +25,24 @@ describe('CopyTraders/TradersFactory: indexer', () => {
     if (!factoryAddr) {
       throw new Error('#getTradersFactory: no factory address provided');
     }
-    const account: Signer = signer ?? ethers.Wallet.createRandom();
+    const account = signer ?? ethers.providers.getDefaultProvider();
     return TradersFactory__factory.connect(factoryAddr, account);
   };
 
   it('Should listen to TraderCreated event and populate db accordingly on catch', async () => {
     factory = getTradersFactory(process.env.TRADERS_FACTORY_ADDR);
-    const mockHandler = jest.fn(() => copyTradersIndexerDefaultHandler("0x31", "0x32", "0x33"));
+    const payload = {
+      onContract: "0x31",
+      strategy: "0x32",
+      observedAddress: "0x33"
+    };
+    const mockHandler = jest.fn(async () => copyTradersIndexerDefaultHandler("0x31", "0x32", "0x33"));
     copyTradersIndexer(factory, mockHandler);
-    mockHandler();
+    const newCopyTradingContract = await mockHandler();
     expect(mockHandler).toHaveBeenCalledTimes(1);
+    factory.removeAllListeners('TraderCreated');
+    expect(newCopyTradingContract.address).toEqual(payload.onContract);
+    expect(newCopyTradingContract.strategy.address).toEqual(payload.strategy);
+    expect(newCopyTradingContract.followedTrader.address).toEqual(payload.observedAddress);
   });
 });

@@ -18,10 +18,10 @@ export class CopyTradingContract extends BaseEntity {
   })
   public address: string;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'jsonb', nullable: true })
   public relayPoolsBalances: Record<string, string>;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'jsonb', nullable: true })
   public operationsPoolsBalances: Record<string, string>;
 
   @CreateDateColumn()
