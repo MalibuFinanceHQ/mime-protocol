@@ -1,4 +1,3 @@
-import { Repository } from 'typeorm';
 import { CopyTradingContract } from '../entities/CopyTradingContract.entity';
 import { FollowedTrader } from '../entities/FollowedTrader.entity';
 import {
@@ -11,7 +10,8 @@ export const copyTradersIndexerDefaultHandler = async (
   strategy: string,
   observedAddress: string
 ) => {
-  const newCopyTradingContract: CopyTradingContract = new CopyTradingContract();
+  // console.log('#copyTradersIndexerDefaultHandler', onContract, strategy, observedAddress);
+  const newCopyTradingContract = new CopyTradingContract();
   newCopyTradingContract.address = onContract;
   let strat = await Strategy.findOne({ address: strategy });
   if (!strat) {
@@ -28,9 +28,9 @@ export const copyTradersIndexerDefaultHandler = async (
   }
   newCopyTradingContract.followedTrader = followedTrader;
   await newCopyTradingContract.save();
+  return newCopyTradingContract;
 };
 
-// Is repository: Repository<CopyTradingContract> necessary to add even with Active Records?
 export async function copyTradersIndexer(
   eventsSourceContract: TradersFactory,
   listenerFn?: (...args: any[]) => any

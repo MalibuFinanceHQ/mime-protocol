@@ -71,6 +71,8 @@ describe('TradersFactory: test', function () {
     factory = await (<TradersFactory__factory>(
       await ethers.getContractFactory('TradersFactory')
     )).deploy(copyTraderBytecodeOnchainInstance.address);
+
+    console.log('factory addr', factory.address);
   });
 
   step(
