@@ -126,6 +126,8 @@ contract CopyTrader is
                 "CopyTrader:relay, ERC20 transfer failed"
             );
         }
+
+        _decreaseRelayPool(refundAsset_, refundAmount);
     }
 
     /// ===== INTERNAL STATE CHANGERS ===== ///
@@ -149,17 +151,6 @@ contract CopyTrader is
     }
 
     /// ===== GETTERS ===== ///
-
-    // TODO remove this debugging function.
-    function poolSize(Pool pool_, address asset_)
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return
-            pool_ == Pool.RELAY ? relayPools[asset_] : operationsPools[asset_];
-    }
 
     // TODO remove this debugging function.
     function isRLPSignatureCorrect(

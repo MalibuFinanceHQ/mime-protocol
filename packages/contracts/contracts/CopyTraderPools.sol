@@ -15,12 +15,6 @@ abstract contract CopyTraderPools is ICopyTrader {
      */
     mapping(address => uint256) public relayPools;
 
-    /**
-     * @dev map(poolAsset => poolSize).
-     * This mapping contains the amount of some tokens locked, in order to execute txns.
-     */
-    mapping(address => uint256) public operationsPools;
-
     function _chargeRelayPool(PoolCharge memory charge_) internal {
         relayPools[charge_.asset] = relayPools[charge_.asset].add(
             charge_.value
@@ -30,10 +24,6 @@ abstract contract CopyTraderPools is ICopyTrader {
     }
 
     function _chargeOperationsPool(PoolCharge memory charge_) internal {
-        operationsPools[charge_.asset] = operationsPools[charge_.asset].add(
-            charge_.value
-        );
-
         emit PoolCharged(charge_, Pool.OPERATIONS);
     }
 
@@ -60,5 +50,28 @@ abstract contract CopyTraderPools is ICopyTrader {
                 ? _chargeRelayPool(charges_[i])
                 : _chargeOperationsPool(charges_[i]);
         }
+    }
+
+    function _decreaseRelayPool(address pool_, uint256 amount_) internal {
+        relayPools[pool_] = relayPools[pool_].sub(amount_);
+    }
+
+    function _balanceOf(address asset_) internal view returns (uint256) {
+        if (asset_ == address(0)) {
+            return address(this).balance;
+        }
+        return IERC20(asset_).balanceOf(asset_);
+    }
+
+    function poolSize(Pool pool_, address asset_)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return
+            pool_ == Pool.RELAY
+                ? relayPools[asset_]
+                : _balanceOf(asset_).sub(relayPools[asset_]);
     }
 }
