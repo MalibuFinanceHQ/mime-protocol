@@ -12,7 +12,7 @@ import "./interfaces/ICopyTraderManager.sol";
 
 import "./proxy/ProxyFactory.sol";
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 contract TradersFactory is ITradersFactory, ProxyFactory {
     using SafeMath for uint256;

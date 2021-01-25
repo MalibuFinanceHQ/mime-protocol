@@ -77,7 +77,7 @@ describe('PricesLib: test', () => {
         TRB_CONTRACT,
         weiAmount,
       );
-      console.log(`Token amount: ${formatEther(tokenAmount)} Ξ`);
+      // console.log(`Token amount: ${formatEther(tokenAmount)} Ξ`);
       expect(tokenAmount).to.not.be.null;
     },
   );

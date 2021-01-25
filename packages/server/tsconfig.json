@@ -4,12 +4,17 @@
     "outDir": "dist",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017",
+    "target": "ESNext",
     "experimentalDecorators": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "compileOnSave": true,
   "include": [
-    "src"
+    "src",
+    "test"
   ]
 }

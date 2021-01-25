@@ -1,7 +1,9 @@
 import 'reflect-metadata';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.test' });
 import connection from '../src/utils/connection';
-import { User } from '../src/entity/User.entity';
-import { CopyTradingContract } from '../src/entity/CopyTradingContract.entity';
+import { User } from '../src/entities/User.entity';
+import { CopyTradingContract } from '../src/entities/CopyTradingContract.entity';
 
 beforeAll(async () => await connection.create());
 
@@ -22,5 +24,4 @@ it('Creates a user', async () => {
   expect(user.copyTradingContracts.length).toBe(1);
   expect(user.copyTradingContracts[0].owner).toBe(user);
   expect(user.copyTradingContracts[0].address).toEqual('0x01');
-
 });
