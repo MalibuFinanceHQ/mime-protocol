@@ -1,6 +1,6 @@
 import { ethers } from 'hardhat';
 import { Signer } from 'ethers';
-import { parseEther, formatEther } from 'ethers/lib/utils';
+import { parseEther } from 'ethers/lib/utils';
 import { expect } from 'chai';
 import {
   CopyTrader,
