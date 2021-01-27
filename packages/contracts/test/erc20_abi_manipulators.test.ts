@@ -19,21 +19,20 @@ describe('ERC20 ABI manipulators: test', () => {
   let approvalsWithReplacementManipulator: ReplaceERC20ApproveSpenderManipulator;
   let approvalsWhitelistManipulator: CheckERC20ApproveSpenderManipulator;
 
-  //@ts-ignore
   before(async () => {
     accounts = await ethers.getSigners();
 
     approvalsWithReplacementManipulator = await (<
       ReplaceERC20ApproveSpenderManipulator__factory
-    >await ethers.getContractFactory(
-      'ReplaceERC20ApproveSpenderManipulator',
-    )).deploy();
+      >await ethers.getContractFactory(
+        'ReplaceERC20ApproveSpenderManipulator',
+      )).deploy();
 
     approvalsWhitelistManipulator = await (<
       CheckERC20ApproveSpenderManipulator__factory
-    >await ethers.getContractFactory(
-      'CheckERC20ApproveSpenderManipulator',
-    )).deploy();
+      >await ethers.getContractFactory(
+        'CheckERC20ApproveSpenderManipulator',
+      )).deploy();
   });
 
   it('Should manipulate the abi by replacing spender correctly', async () => {
@@ -49,7 +48,7 @@ describe('ERC20 ABI manipulators: test', () => {
     assert.equal(manipulated.length, 138);
 
     const decodedIdentifier = manipulated.slice(0, 10);
-    assert.equal(decodedIdentifier, '0x095ea7b3');
+    assert.equal(decodedIdentifier, '0x095ea7b3'); // bytes4(keccak256("approve(address,uint256)")
     const decodedAddress = `0x${manipulated.slice(10, 74).slice(24)}`;
     assert.equal(
       decodedAddress.toLocaleLowerCase(),
@@ -60,7 +59,7 @@ describe('ERC20 ABI manipulators: test', () => {
     assert.isTrue(MaxUint256.eq(`0x${decodedValue}`));
   });
 
-  it('Should check if abi is returned when address in whitelist', async () => {
+  it('Should check if abi is returned when address is whitelisted', async () => {
     const whitelistedSpender = '0x95E6F48254609A6ee006F7D493c8e5fB97094ceF';
     await approvalsWhitelistManipulator.whitelist(whitelistedSpender);
 

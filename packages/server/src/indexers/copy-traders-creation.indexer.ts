@@ -10,7 +10,6 @@ export const copyTradersIndexerDefaultHandler = async (
   strategy: string,
   observedAddress: string
 ) => {
-  // console.log('#copyTradersIndexerDefaultHandler', onContract, strategy, observedAddress);
   const newCopyTradingContract = new CopyTradingContract();
   newCopyTradingContract.address = onContract;
   let strat = await Strategy.findOne({ address: strategy });

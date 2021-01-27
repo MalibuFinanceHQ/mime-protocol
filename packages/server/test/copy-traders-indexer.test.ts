@@ -39,8 +39,10 @@ describe('CopyTraders/TradersFactory: indexer', () => {
     const mockHandler = jest.fn(async () => copyTradersIndexerDefaultHandler("0x31", "0x32", "0x33"));
     copyTradersIndexer(factory, mockHandler);
     const newCopyTradingContract = await mockHandler();
+    // factory.removeListener('TraderCreated', mockHandler);
     expect(mockHandler).toHaveBeenCalledTimes(1);
     factory.removeAllListeners('TraderCreated');
+    expect(factory.listenerCount()).toEqual(0);
     expect(newCopyTradingContract.address).toEqual(payload.onContract);
     expect(newCopyTradingContract.strategy.address).toEqual(payload.strategy);
     expect(newCopyTradingContract.followedTrader.address).toEqual(payload.observedAddress);

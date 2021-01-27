@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.7.5;
 
 import "../interfaces/IABIManipulator.sol";
@@ -28,7 +30,10 @@ contract CheckERC20ApproveSpenderManipulator is IABIManipulator, Ownable {
     {
         bytes memory spenderBytes = rawTxData.slice(4, 32);
         address properSpender = spenderBytes.toAddress(12);
-        require(whitelistedSpenders[properSpender]);
+        require(
+            whitelistedSpenders[properSpender],
+            "manipulate: UNALLOWED_SPENDER"
+        );
         return rawTxData;
     }
 }
