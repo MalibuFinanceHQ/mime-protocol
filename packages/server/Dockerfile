@@ -5,6 +5,8 @@ USER root
 
 COPY . .
 
+COPY package*.json ./
+
 RUN npm install -g ts-node nodemon typescript
 RUN npm install
 
