@@ -11,6 +11,8 @@ import "./utils/AbiUtils.sol";
 import "./interfaces/ITradingStrategy.sol";
 import "./interfaces/IABIManipulator.sol";
 
+import "hardhat/console.sol";
+
 abstract contract CopyTraderRelaysHandler {
     using SafeMath for uint256;
 
@@ -65,7 +67,7 @@ abstract contract CopyTraderRelaysHandler {
         bytes32 r_,
         bytes32 s_,
         address signer_
-    ) internal pure returns (bool, bytes32) {
+    ) internal view returns (bool, bytes32) {
         bytes32 txHash = keccak256(transaction_);
         address signer = ECDSA.recover(txHash, v_, r_, s_);
         return (signer_ == signer, txHash);
@@ -85,6 +87,8 @@ abstract contract CopyTraderRelaysHandler {
             "CopyTrader:_relay, a transaction has been relayed during current block"
         );
 
+        console.logAddress(correctSigner_);
+
         (bool signatureOk, bytes32 txHash) =
             _isRLPSignatureCorrect(
                 transaction_,
@@ -94,7 +98,10 @@ abstract contract CopyTraderRelaysHandler {
                 correctSigner_
             );
 
-        require(signatureOk && !relayedTxns[txHash]);
+        require(
+            signatureOk && !relayedTxns[txHash],
+            "CopyTrader:_relay, invalid signature"
+        );
 
         EIP155Utils.EIP155Transaction memory eip155tx =
             EIP155Utils.decodeEIP155Transaction(transaction_);

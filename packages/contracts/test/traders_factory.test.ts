@@ -38,6 +38,7 @@ import {
   parseCopyTraderChargedEvents,
 } from './utils/logs-parsers';
 import { CopyTraderPoolChargeStruct, CopyTraderPool } from './utils/types';
+import { getTxV } from './utils/get-tx-v';
 
 describe('TradersFactory: test', function () {
   let accounts: Signer[];
@@ -184,10 +185,7 @@ describe('TradersFactory: test', function () {
         arrayify(signedRawWalletTx),
       );
 
-      const chainID = tx.chainId || 0;
-      const assumption = 27 + chainID * 2 + 8;
-      const parsedV: number | undefined = parsedWalletSignedTx.v;
-      const finalV = parsedV === assumption ? 27 : 28;
+      const finalV = getTxV(parsedWalletSignedTx);
 
       const [
         isValid,

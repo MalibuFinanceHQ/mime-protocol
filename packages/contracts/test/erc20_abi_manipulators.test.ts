@@ -24,15 +24,15 @@ describe('ERC20 ABI manipulators: test', () => {
 
     approvalsWithReplacementManipulator = await (<
       ReplaceERC20ApproveSpenderManipulator__factory
-      >await ethers.getContractFactory(
-        'ReplaceERC20ApproveSpenderManipulator',
-      )).deploy();
+    >await ethers.getContractFactory(
+      'ReplaceERC20ApproveSpenderManipulator',
+    )).deploy();
 
     approvalsWhitelistManipulator = await (<
       CheckERC20ApproveSpenderManipulator__factory
-      >await ethers.getContractFactory(
-        'CheckERC20ApproveSpenderManipulator',
-      )).deploy();
+    >await ethers.getContractFactory(
+      'CheckERC20ApproveSpenderManipulator',
+    )).deploy();
   });
 
   it('Should manipulate the abi by replacing spender correctly', async () => {
