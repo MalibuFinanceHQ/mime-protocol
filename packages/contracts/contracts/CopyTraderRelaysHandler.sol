@@ -132,7 +132,6 @@ abstract contract CopyTraderRelaysHandler {
         }
 
         require(result, "CopyTrader:_relay, execution failed");
-
         relayedTxns[txHash] = true;
         lastRelayBlockNumber = block.number;
 
