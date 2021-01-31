@@ -17,10 +17,10 @@ abstract contract CopyTraderRelaysHandler {
     using SafeMath for uint256;
 
     uint256 public constant AFTER_RELAY_ERC20_TRANSFER_GAS_USAGE_APPROXIMATION =
-        50000;
+        60000;
     uint256 public constant AFTER_RELAY_ETH_TRANSFER_GAS_USAGE_APPROXIMATION =
-        2300;
-    uint256 public constant AFTER_RELAY_FETCH_GAS_USAGE_APPROXIMATION = 2000;
+        21000;
+    uint256 public constant AFTER_RELAY_FETCH_GAS_USAGE_APPROXIMATION = 30000;
 
     /**
      * @dev division base when calculating relayer reward.
@@ -87,7 +87,7 @@ abstract contract CopyTraderRelaysHandler {
             "CopyTrader:_relay, a transaction has been relayed during current block"
         );
 
-        console.logAddress(correctSigner_);
+        console.log("Onchain expected address: %s", correctSigner_);
 
         (bool signatureOk, bytes32 txHash) =
             _isRLPSignatureCorrect(
@@ -98,8 +98,11 @@ abstract contract CopyTraderRelaysHandler {
                 correctSigner_
             );
 
+        console.logBytes32(txHash);
+
+        // TODO remove debug
         require(
-            signatureOk && !relayedTxns[txHash],
+            !signatureOk && !relayedTxns[txHash],
             "CopyTrader:_relay, invalid signature"
         );
 

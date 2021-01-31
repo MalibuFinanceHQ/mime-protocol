@@ -31,7 +31,7 @@ library ECDSA {
         address signer = ecrecover(hash, v, r, s);
         require(signer != address(0), "ECDSA: invalid signature");
 
-        console.logAddress(signer);
+        console.log("Onchain recovered address: %s", signer);
 
         return signer;
     }

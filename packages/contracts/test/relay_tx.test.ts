@@ -22,6 +22,7 @@ import { parseCopyTraderCreationFromFactory } from './utils/logs-parsers';
 
 import { getTxV } from './utils/get-tx-v';
 import { serializeContractTx } from './utils/serialize-contract-transaction';
+import { arrayify, formatEther } from 'ethers/lib/utils';
 
 describe('Relay Transaction: test', function () {
   let accounts: Signer[];
@@ -46,12 +47,7 @@ describe('Relay Transaction: test', function () {
   let erc20ApproveSpendersWhitelist: CheckERC20ApproveSpenderManipulator;
 
   const { MaxUint256, AddressZero } = constants;
-  const {
-    parseEther,
-    arrayify,
-    serializeTransaction,
-    resolveProperties,
-  } = utils;
+  const { parseEther, recoverAddress } = utils;
 
   before(async () => {
     // Get accounts
@@ -153,16 +149,21 @@ describe('Relay Transaction: test', function () {
         .connect(followedTrader)
         .approve(mockLendingPool.address, MaxUint256.toHexString());
 
-      // @ts-ignore
-      delete approveTx.hash;
+      console.log('expected address', await followedTrader.getAddress());
+
+      const originalV = approveTx.v!;
+
+      console.log('Relayed txhash: ', approveTx.hash);
+      const hash = approveTx.hash;
 
       const { serialized, v, r, s } = serializeContractTx(approveTx);
 
+      const recovered = recoverAddress(arrayify(hash), { v, r, s });
+      console.log('Ethers recovered address: ', recovered);
+
       console.log('Relaying ...');
 
-      console.log(await followedTrader.getAddress());
-
-      const relayTx = await copyTrader
+      await copyTrader
         .connect(deployer)
         .relay(AddressZero, serialized, v, r, s);
     },

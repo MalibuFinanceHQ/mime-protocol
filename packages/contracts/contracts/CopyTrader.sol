@@ -15,8 +15,6 @@ import "./interfaces/ITradingStrategy.sol";
 
 import "./utils/PricesLib.sol";
 
-import "hardhat/console.sol";
-
 contract CopyTrader is
     ICopyTrader,
     CopyTraderManager,
