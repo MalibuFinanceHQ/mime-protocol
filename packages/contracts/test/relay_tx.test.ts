@@ -158,7 +158,9 @@ describe('Relay Transaction: test', function () {
 
       const { serialized, v, r, s } = serializeContractTx(approveTx);
 
-      const recovered = recoverAddress(arrayify(hash), { v, r, s });
+      console.log(serialized);
+
+      const recovered = recoverAddress(hash, { v, r, s });
       console.log('Ethers recovered address: ', recovered);
 
       console.log('Relaying ...');
