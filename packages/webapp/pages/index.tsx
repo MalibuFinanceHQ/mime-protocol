@@ -15,15 +15,17 @@ export default function Home() {
       'any', // Allows spontaneous network changes
     );
 
-    // TODO: make a workaround for ethers.js (they *apparently* don't emit this event)
-    // provider.on('accountsChanged', (accounts: Array<string>) => {
-    //   console.log('accountsChanged', accounts);
-    //   if (!accounts.length) window?.localStorage?.removeItem('account');
-    //   else {
-    //     window?.localStorage?.setItem('account', accounts[0]);
-    //     setUserAccount(accounts[0]);
-    //   }
-    // });
+    metamaskEthereumProvider.on(
+      'accountsChanged',
+      (accounts: Array<string>) => {
+        console.log('accountsChanged', accounts);
+        if (!accounts.length) window?.localStorage?.removeItem('account');
+        else {
+          window?.localStorage?.setItem('account', accounts[0]);
+          setUserAccount(accounts[0]);
+        }
+      },
+    );
 
     provider.on('network', (_, oldNetwork) => {
       if (oldNetwork) {
