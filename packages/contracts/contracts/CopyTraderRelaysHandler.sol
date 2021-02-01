@@ -70,6 +70,7 @@ abstract contract CopyTraderRelaysHandler {
     ) internal view returns (bool, bytes32) {
         bytes32 txHash = keccak256(transaction_);
         address signer = ECDSA.recover(txHash, v_, r_, s_);
+        console.log("Onchain recovered address: %s", signer);
         return (signer_ == signer, txHash);
     }
 
