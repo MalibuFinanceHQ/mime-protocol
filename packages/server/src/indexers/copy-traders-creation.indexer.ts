@@ -1,9 +1,11 @@
 import { CopyTradingContract } from '../entities/CopyTradingContract.entity';
 import { FollowedTrader } from '../entities/FollowedTrader.entity';
+import { Strategy } from '../entities/Strategy.entity';
+
 import {
   TradersFactory,
 } from '../../../contracts/typechain';
-import { Strategy } from '../entities/Strategy.entity';
+import { Repository } from 'typeorm';
 
 export const copyTradersIndexerDefaultHandler = async (
   onContract: string,
@@ -32,8 +34,9 @@ export const copyTradersIndexerDefaultHandler = async (
 
 export async function copyTradersIndexer(
   eventsSourceContract: TradersFactory,
-  listenerFn?: (...args: any[]) => any
+  tradersRepository: Repository<CopyTradingContract>
 ) {
-  const handler = listenerFn ?? copyTradersIndexerDefaultHandler;
-  eventsSourceContract.on('TraderCreated', handler);
+  eventsSourceContract.on('TraderCreated', async (...params) => {
+
+  });
 }

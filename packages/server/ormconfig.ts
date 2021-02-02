@@ -19,5 +19,5 @@ export = {
   entities: ['src/entities/*.ts'],
   logging: false,
   synchronize: true,
-  migrationsRun: true
+  migrationsRun: true,
 };
