@@ -71,4 +71,9 @@ interface ICopyTrader {
      * to be made only by a relayer.
      */
     function setFeesPaymentsAsset(address asset_) external;
+
+    function withdrawFromOperationPool(PoolCharge calldata withdrawal_)
+        external;
+
+    function withdrawFromRelayPool(PoolCharge calldata withdrawal_) external;
 }

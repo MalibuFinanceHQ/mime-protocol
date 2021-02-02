@@ -7,7 +7,7 @@ import 'hardhat-gas-reporter';
 
 dotenv.config();
 
-const { ALCHEMY_API_KEY } = process.env;
+const { ALCHEMY_API_KEY, DEPLOYMENT_PRIV_KEY } = process.env;
 
 if (!ALCHEMY_API_KEY) throw new Error('No ALCHEMY_API_KEY specified in .env');
 
@@ -31,6 +31,10 @@ const config: HardhatUserConfig = {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
         blockNumber: 11704833,
       },
+    },
+    kovan: {
+      url: 'https://kovan.infura.io/v3/9defdc016d654060a6d372cbe5b2de0c',
+      accounts: [DEPLOYMENT_PRIV_KEY!],
     },
   },
 };

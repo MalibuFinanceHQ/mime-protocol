@@ -29,6 +29,41 @@ abstract contract CopyTraderPools is ICopyTrader {
         emit PoolCharged(charge_, Pool.OPERATIONS);
     }
 
+    function _withdrawFromRelayPool(PoolCharge memory withdrawal_) internal {
+        _decreaseRelayPool(withdrawal_.asset, withdrawal_.value);
+        if (withdrawal_.asset == address(0)) {
+            msg.sender.transfer(withdrawal_.value);
+        } else {
+            require(
+                IERC20(withdrawal_.asset).transfer(
+                    msg.sender,
+                    withdrawal_.value
+                )
+            );
+        }
+    }
+
+    function _withdrawFromOperationPool(PoolCharge memory withdrawal_)
+        internal
+    {
+        require(
+            this.poolSize(Pool.OPERATIONS, withdrawal_.asset) >=
+                withdrawal_.value
+        );
+
+        if (withdrawal_.asset == address(0)) {
+            // TODO investigate for reentrancy.
+            msg.sender.transfer(withdrawal_.value);
+        } else {
+            require(
+                IERC20(withdrawal_.asset).transfer(
+                    msg.sender,
+                    withdrawal_.value
+                )
+            );
+        }
+    }
+
     function _handleMultipleCharges(
         PoolCharge[] memory charges_,
         Pool[] memory chargedPools_

@@ -90,6 +90,22 @@ contract CopyTrader is
         _handleMultipleCharges(charges_, chargedPools_);
     }
 
+    function withdrawFromOperationPool(PoolCharge calldata withdrawal_)
+        external
+        override
+        onlyManager
+    {
+        _withdrawFromOperationPool(withdrawal_);
+    }
+
+    function withdrawFromRelayPool(PoolCharge calldata withdrawal_)
+        external
+        override
+        onlyManager
+    {
+        _withdrawFromRelayPool(withdrawal_);
+    }
+
     function setRelayerFee(uint256 fee_) external onlyManager() {
         _setRelayerFee(fee_);
     }

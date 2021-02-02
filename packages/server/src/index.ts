@@ -5,14 +5,25 @@ import { Request, Response } from 'express';
 import { createConnection } from 'typeorm';
 import * as cron from 'node-cron';
 import cronTask from './cron-task';
-import { providers, Wallet } from 'ethers'
+import { providers, Wallet } from 'ethers';
 
-createConnection().then(connection => {
+import { CopyTradingContract } from './entities/CopyTradingContract.entity';
+import {
+  TradersFactory,
+  TradersFactory__factory,
+} from '../../contracts/typechain';
+
+createConnection().then((connection) => {
   const app = express();
   app.use(express.json());
 
-  const provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL)
-  const wallet = new Wallet(process.env.PRIVATE_KEY!, provider)
+  // Ethereum connection singletons.
+  const provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
+  const wallet = new Wallet(process.env.PRIVATE_KEY!, provider);
+  const factoryContract = TradersFactory__factory.connect('', wallet);
+
+  // Database connection singletons.
+  const copyTradersRepository = connection.getRepository(CopyTradingContract);
 
   // Defaults to a 15 seconds interval
   cron.schedule(process.env.CRON_SCHEDULE || '*/30 * * * * * *', cronTask);
