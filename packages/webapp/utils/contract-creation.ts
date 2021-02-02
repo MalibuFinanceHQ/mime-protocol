@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, Signer } from 'ethers';
 import { MimeContext } from './context';
 import { NewContractForm } from './types';
 import {
@@ -6,19 +6,17 @@ import {
     TradersFactory__factory,
 } from '../../contracts/typechain';
 
-let FACTORY;
 
 const getFactory = async (
-    provider: ethers.providers.Web3Provider,
-): Promise<ethers.Contract> => {
+    signer: Signer,
+): Promise<TradersFactory> => {
     const { TRADERS_FACTORY_ADDRESS } = process.env;
     if (!TRADERS_FACTORY_ADDRESS) {
         throw new Error('TRADERS_FACTORY_ADDRESS is not set in env');
     }
-    // if (!FACTORY) {
-    //     FACTORY = // TODO: get the factory
-    // }
-    return FACTORY;
+
+    return TradersFactory__factory.connect(TRADERS_FACTORY_ADDRESS, signer)
+
 };
 
 export const createCopyTradingContract = async (
