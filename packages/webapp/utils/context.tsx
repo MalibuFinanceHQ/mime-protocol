@@ -12,10 +12,7 @@ export const defaultCtxt: MimeContext = {
   currentNetworkId: null,
   requiredNetworkId: 42, // Kovan testnet
   provider: null,
-  account:
-    typeof window !== 'undefined'
-      ? window.localStorage.getItem('account')
-      : null, // Current user account
+  account: null,
 };
 
 const Context = createContext(defaultCtxt);

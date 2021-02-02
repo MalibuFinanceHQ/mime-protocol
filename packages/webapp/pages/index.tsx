@@ -19,31 +19,27 @@ export default function Home() {
       'accountsChanged',
       (accounts: Array<string>) => {
         console.log('accountsChanged', accounts);
-        if (!accounts.length) window?.localStorage?.removeItem('account');
-        else {
-          window?.localStorage?.setItem('account', accounts[0]);
-          setUserAccount(accounts[0]);
-        }
+        setUserAccount(accounts[0]);
       },
     );
 
     provider.on('network', (_, oldNetwork) => {
       if (oldNetwork) {
-        // Questionable
-        window?.localStorage?.removeItem('account');
         window.location.reload();
       }
     });
     const network = await provider.getNetwork();
+
+    const accounts = await provider.listAccounts();
     setCtxt({
       ...ctxt,
       provider,
       currentNetworkId: network.chainId,
+      account: accounts.length > 0 ? accounts[0] : null,
     });
   };
 
   const setUserAccount = (account: string) => {
-    window?.localStorage?.setItem('account', account);
     setCtxt({
       ...ctxt,
       account,
