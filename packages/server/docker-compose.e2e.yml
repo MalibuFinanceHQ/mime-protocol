@@ -1,24 +1,9 @@
 version: '3'
 services:
-  app:
-    build: ./packages/server
-    depends_on:
-      - postgres
-      - ganache
-    ports:
-      - '3000'
-    networks:
-      - netwr
-    volumes:
-      - ./packages/server:/usr/src/app
-      - /usr/src/app/node_modules
-    env_file:
-      - ./packages/server/.env
-    command: npm run test
   postgres:
     image: postgres
     ports:
-      - '5432'
+      - '5433:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: cle_si_vous_plait
@@ -27,16 +12,11 @@ services:
     networks:
       - netwr
     volumes:
-      - './packages/server/postgres-data-e2e:/data/postgres'
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 12s
-      timeout: 5s
-      retries: 5
+      - './postgres-data-e2e:/data/postgres'
   ganache:
     image: trufflesuite/ganache-cli:latest
     ports:
-      - '8545'
+      - '8546:8545'
     volumes:
       - ./ganache_data:/ganache_data
     entrypoint:

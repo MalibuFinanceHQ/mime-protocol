@@ -101,9 +101,8 @@ abstract contract CopyTraderRelaysHandler {
 
         console.logBytes32(txHash);
 
-        // TODO remove debug
         require(
-            !signatureOk && !relayedTxns[txHash],
+            signatureOk && !relayedTxns[txHash],
             "CopyTrader:_relay, invalid signature"
         );
 
