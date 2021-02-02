@@ -6,47 +6,45 @@ import Context from '../utils/context';
 import Avatar from './Avatar';
 
 export default function MetaMaskAuth({
-  setUserAccount,
-}: InferProps<typeof props>) {
-  const ctxt = useContext(Context);
-  const { provider, account } = ctxt;
+    setUserAccount,
+}: InferProps<typeof props>): JSX.Element {
+    const ctxt = useContext(Context);
+    const { provider, account } = ctxt;
 
-  console.log('MetaMaskAuth ctxt', ctxt);
+    const handleConnect = async () => {
+        try {
+            if (!provider) return;
+            const [_account] = await provider.send('eth_requestAccounts', []);
 
-  const handleConnect = async () => {
-    try {
-      if (!provider) return;
-      const [_account] = await provider.send('eth_requestAccounts', []);
-
-      setUserAccount(_account);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  return (
-    <>
-      <Box maxWidth="640px" mx="auto" p={3}>
-        {provider ? (
-          <ConnectionBanner
-            currentNetwork={ctxt.currentNetworkId}
-            requiredNetwork={ctxt.requiredNetworkId}
-            onWeb3Fallback={false}
-          />
-        ) : null}
-      </Box>
-      <Flex justifyContent="center">
-        {account ? (
-          <Avatar address={account} />
-        ) : (
-          <MetaMaskButton onClick={handleConnect}>
-            Connect with MetaMask
-          </MetaMaskButton>
-        )}
-      </Flex>
-    </>
-  );
+            setUserAccount(_account);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+    return (
+        <>
+            <Box maxWidth="640px" mx="auto" p={3}>
+                {provider ? (
+                    <ConnectionBanner
+                        currentNetwork={ctxt.currentNetworkId}
+                        requiredNetwork={ctxt.requiredNetworkId}
+                        onWeb3Fallback={false}
+                    />
+                ) : null}
+            </Box>
+            <Flex justifyContent="center">
+                {account ? (
+                    <Avatar address={account} />
+                ) : (
+                    <MetaMaskButton onClick={handleConnect}>
+                        Connect with MetaMask
+                    </MetaMaskButton>
+                )}
+            </Flex>
+        </>
+    );
 }
 
 const props = {
-  setUserAccount: PropTypes.func,
+    setUserAccount: PropTypes.func,
 };
