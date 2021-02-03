@@ -1,6 +1,12 @@
 import {
-  BaseEntity, Entity, OneToMany, PrimaryColumn,
-  CreateDateColumn, UpdateDateColumn, DeleteDateColumn,
+  BaseEntity,
+  Entity,
+  OneToMany,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  Column,
 } from 'typeorm';
 import { CopyTradingContract } from './CopyTradingContract.entity';
 import { Transaction } from './Transaction.entity';
@@ -13,6 +19,9 @@ export class FollowedTrader extends BaseEntity {
   })
   public address: string;
 
+  @Column({ type: 'int', default: 0 })
+  public lastCachedNonce: number;
+
   @CreateDateColumn()
   public createdAt: Date;
 
@@ -24,9 +33,12 @@ export class FollowedTrader extends BaseEntity {
 
   // Relations
 
-  @OneToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.followedTrader)
+  @OneToMany(
+    () => CopyTradingContract,
+    (copyTradingContract) => copyTradingContract.followedTrader,
+  )
   public followersContracts: CopyTradingContract[];
 
-  @OneToMany(() => Transaction, transaction => transaction.copiedFrom)
+  @OneToMany(() => Transaction, (transaction) => transaction.copiedFrom)
   public copiedTxns: Transaction[];
 }

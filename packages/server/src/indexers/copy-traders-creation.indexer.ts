@@ -3,19 +3,18 @@ import { FollowedTrader } from '../entities/FollowedTrader.entity';
 import { Strategy } from '../entities/Strategy.entity';
 
 import { TradersFactory } from '../../../contracts/typechain';
-import { Repository } from 'typeorm';
+import { Repository, getManager } from 'typeorm';
 
 import { utils } from 'ethers';
 import { User } from '../entities/User.entity';
 import { CopyTraderCreationEvent } from '../common/copy-trader-creation.event';
 
-export async function copyTradersIndexer(
-  eventsSourceContract: TradersFactory,
-  tradersRepository: Repository<CopyTradingContract>,
-  strategiesRepository: Repository<Strategy>,
-  usersRepository: Repository<User>,
-  followedTradersRepository: Repository<FollowedTrader>,
-) {
+export async function copyTradersIndexer(eventsSourceContract: TradersFactory) {
+  // Load database connections.
+  const strategiesRepository = getManager().getRepository(Strategy);
+  const usersRepository = getManager().getRepository(User);
+  const followedTradersRepository = getManager().getRepository(FollowedTrader);
+
   const filter = {
     address: eventsSourceContract.address,
     topics: [
