@@ -31,7 +31,7 @@ export async function relayQueuedTransactions(
       .where('followedTrader.address = :from', {
         from: tx.from.toLocaleLowerCase(),
       })
-      .andWhere('entity.relaySinceNonce =< :nonce', { nonce: tx.nonce })
+      .andWhere('entity.relaySinceNonce <= :nonce', { nonce: tx.nonce })
       .getMany();
 
     relayedTxCopingTraders[txHash] = copyTraders;

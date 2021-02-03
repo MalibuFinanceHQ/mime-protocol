@@ -4,6 +4,7 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import { createConnection } from 'typeorm';
 import { providers, Wallet } from 'ethers';
+import * as cron from 'node-cron';
 
 import { createNodeRedisClient } from 'handy-redis';
 
@@ -13,6 +14,7 @@ import { copyTradersIndexer } from './indexers/copy-traders-creation.indexer';
 
 import { AppRoutes } from './api/routes';
 import { filterAndQueueRelayableTxnsInBlock } from './crons/queue-txns-to-relay';
+import { relayQueuedTransactions } from './crons/relay-queued-transactions';
 
 createConnection().then(() => {
   const app = express();
@@ -39,6 +41,10 @@ createConnection().then(() => {
   });
 
   provider.on('pending', (tx) => console.log(tx));
+
+  cron.schedule(process.env.CRON_SCHEDULE || '*/30 * * * * * *', () =>
+    relayQueuedTransactions(wallet, redis),
+  );
 
   // Defaults to a 15 seconds interval
   // cron.schedule(process.env.CRON_SCHEDULE || '*/30 * * * * * *', cronTask);
