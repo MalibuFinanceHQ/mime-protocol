@@ -1,7 +1,14 @@
 import {
-  BaseEntity, Column, CreateDateColumn, DeleteDateColumn,
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
-  OneToMany, ManyToMany, ManyToOne, PrimaryColumn, UpdateDateColumn
+  OneToMany,
+  ManyToMany,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { FollowedTrader } from './FollowedTrader.entity';
 import { PoolTopUp } from './PoolTopUp.entity';
@@ -18,11 +25,14 @@ export class CopyTradingContract extends BaseEntity {
   })
   public address: string;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'jsonb', nullable: true, default: {} })
   public relayPoolsBalances: Record<string, string>;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'jsonb', nullable: true, default: {} })
   public operationsPoolsBalances: Record<string, string>;
+
+  @Column({ type: 'int' })
+  public relaySinceNonce: number;
 
   @CreateDateColumn()
   public createdAt: Date;
@@ -35,18 +45,20 @@ export class CopyTradingContract extends BaseEntity {
 
   // Relations
 
-  @ManyToOne(() => User, user => user.copyTradingContracts, { nullable: true })
+  @ManyToOne(() => User, (user) => user.copyTradingContracts, {
+    nullable: true,
+  })
   public owner: User;
 
-  @ManyToOne(() => Strategy, strategy => strategy.copyTradingContracts)
+  @ManyToOne(() => Strategy, (strategy) => strategy.copyTradingContracts)
   public strategy: Strategy;
 
   @ManyToOne(() => FollowedTrader)
   public followedTrader: FollowedTrader;
 
-  @OneToMany(() => PoolTopUp, poolTopUp => poolTopUp.copyTradingContract)
+  @OneToMany(() => PoolTopUp, (poolTopUp) => poolTopUp.copyTradingContract)
   public poolTopUps: PoolTopUp[];
 
-  @ManyToMany(() => Transaction, transaction => transaction.copiedBy)
+  @ManyToMany(() => Transaction, (transaction) => transaction.copiedBy)
   public copiedTxns: Transaction[];
 }
