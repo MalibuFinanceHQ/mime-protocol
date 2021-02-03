@@ -36,7 +36,13 @@ contract TradersFactory is ITradersFactory, ProxyFactory {
         ICopyTraderManager(trader_).setManager(msg.sender);
         ICopyTrader(trader_).init(observe_, relaySinceNonce_, strategy_);
 
-        emit TraderCreated(address(trader_), address(strategy_), observe_);
+        emit TraderCreated(
+            msg.sender,
+            address(trader_),
+            address(strategy_),
+            observe_,
+            relaySinceNonce_
+        );
         return trader_;
     }
 }

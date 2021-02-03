@@ -3,7 +3,7 @@ WORKDIR /usr/src/app
 
 USER root
 
-COPY . .
+COPY ./ ./
 
 COPY package.json ./
 

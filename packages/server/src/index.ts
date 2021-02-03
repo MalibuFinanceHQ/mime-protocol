@@ -12,6 +12,9 @@ import {
   TradersFactory,
   TradersFactory__factory,
 } from '../../contracts/typechain';
+import { Strategy } from './entities/Strategy.entity';
+
+import { copyTradersIndexer } from './indexers/copy-traders-creation.indexer';
 
 createConnection().then((connection) => {
   const app = express();
@@ -20,10 +23,22 @@ createConnection().then((connection) => {
   // Ethereum connection singletons.
   const provider = new providers.JsonRpcProvider(process.env.PROVIDER_URL);
   const wallet = new Wallet(process.env.PRIVATE_KEY!, provider);
-  const factoryContract = TradersFactory__factory.connect('', wallet);
+  const factoryContract = TradersFactory__factory.connect(
+    process.env.FACTORY_CONTRACT!,
+    wallet,
+  );
 
   // Database connection singletons.
   const copyTradersRepository = connection.getRepository(CopyTradingContract);
+  const tradingStrategiesRepository = connection.getRepository(Strategy);
+
+  // Start indexers
+
+  copyTradersIndexer(
+    factoryContract,
+    copyTradersRepository,
+    tradingStrategiesRepository,
+  );
 
   // Defaults to a 15 seconds interval
   cron.schedule(process.env.CRON_SCHEDULE || '*/30 * * * * * *', cronTask);

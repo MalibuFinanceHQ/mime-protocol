@@ -2,6 +2,7 @@ import { ContractReceipt } from 'ethers';
 
 import { TradersFactoryTraderCreatedEvent, PoolChargedEvent } from './types';
 
+// TODO handle ABI change
 export function parseCopyTraderCreationFromFactory(
   receipt: ContractReceipt,
 ): TradersFactoryTraderCreatedEvent {

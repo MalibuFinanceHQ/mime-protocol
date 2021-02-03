@@ -8,8 +8,10 @@ import "./ICopyTrader.sol";
 // TODO consider to make some params indexed.
 interface ITradersFactory {
     event TraderCreated(
+        address creator,
         address onContract,
         address strategy,
-        address observedAddress
+        address observedAddress,
+        uint256 relaySinceNonce
     );
 }

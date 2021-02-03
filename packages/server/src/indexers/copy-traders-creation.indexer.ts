@@ -37,17 +37,17 @@ export const copyTradersIndexerDefaultHandler = async (
 export async function copyTradersIndexer(
   eventsSourceContract: TradersFactory,
   tradersRepository: Repository<CopyTradingContract>,
+  strategiesRepository: Repository<Strategy>,
 ) {
   const filter = {
     address: eventsSourceContract.address,
-    topics: [
-      utils.id(
-        'TraderCreated(address onContract, address strategy, address observedAddress)',
-      ),
-    ],
+    topics: [utils.id('TraderCreated(address,address,address)')],
   };
 
+  console.log('Starting indexer ... ');
+
   eventsSourceContract.on(filter, async (...logs) => {
+    console.log('event catched');
     // Get proper log.
     const txData = logs[logs.length - 1];
 

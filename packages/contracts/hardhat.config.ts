@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import '@nomiclabs/hardhat-waffle';
 import 'hardhat-typechain';
 import 'hardhat-gas-reporter';
+import '@nomiclabs/hardhat-etherscan';
 
 dotenv.config();
 
@@ -36,6 +37,9 @@ const config: HardhatUserConfig = {
       url: 'https://kovan.infura.io/v3/9defdc016d654060a6d372cbe5b2de0c',
       accounts: [DEPLOYMENT_PRIV_KEY!],
     },
+  },
+  etherscan: {
+    apiKey: '9SQ26N4VERJTXBWXQ4H94X4X98UZ4VFPHB',
   },
 };
 
