@@ -21,6 +21,7 @@ export default function MetaMaskAuth({
             console.error(err);
         }
     };
+
     return (
         <>
             <Box maxWidth="640px" mx="auto" p={3}>

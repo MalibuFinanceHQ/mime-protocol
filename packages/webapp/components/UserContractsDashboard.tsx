@@ -4,6 +4,7 @@ import { NewContractForm } from '../utils/types';
 import NewUserContractForm from './NewUserContractForm';
 import { createCopyTradingContract } from '../utils/contract-creation';
 import Context from '../utils/context';
+import UserContractsList from './UserContractsList';
 
 const UserContractsDashboard = (): JSX.Element => {
     const ctxt = useContext(Context);
@@ -31,10 +32,11 @@ const UserContractsDashboard = (): JSX.Element => {
         setIsLoading(false);
     };
 
+    const contractsList = []; // TODO: fetch from server
+
     return (
         <Box className="App" p={4}>
             <Box>
-                <Button onClick={openModal}>Create a new contract</Button>
                 <Modal isOpen={isOpen}>
                     <Card width="420px" p={0}>
                         <Button.Text
@@ -66,6 +68,10 @@ const UserContractsDashboard = (): JSX.Element => {
                         </Box>
                     </Card>
                 </Modal>
+                <UserContractsList contractsList={contractsList} />
+                <Button onClick={openModal} mt={25}>
+                    Create a new contract
+                </Button>
             </Box>
         </Box>
     );

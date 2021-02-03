@@ -11,13 +11,13 @@ export default function Home(): JSX.Element {
     const [ctxt, setCtxt] = useState(defaultCtxt);
 
     const initProvider = async () => {
-        const metamaskEthereumProvider: any = await detectEthereumProvider();
+        const metamaskEthereumProvider = await detectEthereumProvider();
         const provider = new ethers.providers.Web3Provider(
             metamaskEthereumProvider,
             'any', // Allows spontaneous network changes
         );
 
-        metamaskEthereumProvider.on(
+        (metamaskEthereumProvider as ethers.providers.Provider).on(
             'accountsChanged',
             (accounts: Array<string>) => {
                 console.log('accountsChanged', accounts);
@@ -39,6 +39,7 @@ export default function Home(): JSX.Element {
             currentNetworkId: network.chainId,
             account: accounts.length > 0 ? accounts[0] : null,
         });
+        console.log('ctxt', ctxt);
     };
 
     const setUserAccount = (account: string) => {

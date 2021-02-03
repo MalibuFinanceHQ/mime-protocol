@@ -1,18 +1,20 @@
 import React from 'react';
-import { Blockie, EthAddress } from 'rimble-ui';
+import { Blockie, EthAddress, Box } from 'rimble-ui';
 import PropTypes, { InferProps } from 'prop-types';
 
 const Avatar = ({ address }: InferProps<typeof props>): JSX.Element => (
-    <>
+    <Box mx="auto" key={`avatar-${address}`}>
         <Blockie
-            seed={address}
-            bgcolor="#a71"
-            size={15}
-            scale={3}
-            spotcolor="#000"
+            opts={{
+                seed: address,
+                bgcolor: '#a71',
+                size: 15,
+                scale: 3,
+                spotcolor: '#000',
+            }}
         />
-        <EthAddress address={address} />
-    </>
+        {/* <EthAddress address={address} /> */}
+    </Box>
 );
 
 const props = {
