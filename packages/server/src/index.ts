@@ -15,6 +15,8 @@ import {
 import { Strategy } from './entities/Strategy.entity';
 
 import { copyTradersIndexer } from './indexers/copy-traders-creation.indexer';
+import { User } from './entities/User.entity';
+import { FollowedTrader } from './entities/FollowedTrader.entity';
 
 createConnection().then((connection) => {
   const app = express();
@@ -31,13 +33,16 @@ createConnection().then((connection) => {
   // Database connection singletons.
   const copyTradersRepository = connection.getRepository(CopyTradingContract);
   const tradingStrategiesRepository = connection.getRepository(Strategy);
+  const usersRepository = connection.getRepository(User);
+  const followedTradersRepository = connection.getRepository(FollowedTrader);
 
   // Start indexers
-
   copyTradersIndexer(
     factoryContract,
     copyTradersRepository,
     tradingStrategiesRepository,
+    usersRepository,
+    followedTradersRepository,
   );
 
   // Defaults to a 15 seconds interval
