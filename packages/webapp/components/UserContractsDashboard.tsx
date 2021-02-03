@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Box, Modal, Button, Card, Heading } from 'rimble-ui';
+import { Box, Modal, Button, Card, Heading, Loader } from 'rimble-ui';
 import { NewContractForm } from '../utils/types';
 import NewUserContractForm from './NewUserContractForm';
 import { createCopyTradingContract } from '../utils/contract-creation';
@@ -9,6 +9,7 @@ const UserContractsDashboard = (): JSX.Element => {
     const ctxt = useContext(Context);
 
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const closeModal = (e: React.SyntheticEvent) => {
         e.preventDefault();
@@ -21,8 +22,13 @@ const UserContractsDashboard = (): JSX.Element => {
     };
 
     const handleSubmit = async (form: NewContractForm) => {
-        await createCopyTradingContract(form, ctxt);
+        const tx = await createCopyTradingContract(form, ctxt);
+        console.log('new CopyTradingContract tx', tx);
+        setIsLoading(true);
+        const receipt = await tx.wait();
+        console.log('new CopyTradingContract tx receipt', receipt);
         setIsOpen(false);
+        setIsLoading(false);
     };
 
     return (
@@ -44,11 +50,19 @@ const UserContractsDashboard = (): JSX.Element => {
                         />
 
                         <Box p={4} mb={3}>
-                            <Heading.h3>Contract Creation</Heading.h3>
-                            <NewUserContractForm
-                                handleFormSubmit={handleSubmit}
-                                handleClose={closeModal}
-                            />
+                            <Heading.h3>{`${
+                                !isLoading
+                                    ? 'Contract Creation'
+                                    : 'Waiting for confirmation...'
+                            }`}</Heading.h3>
+                            {!isLoading ? (
+                                <NewUserContractForm
+                                    handleFormSubmit={handleSubmit}
+                                    handleClose={closeModal}
+                                />
+                            ) : (
+                                <Loader mx="auto" mt={25} size={80} />
+                            )}
                         </Box>
                     </Card>
                 </Modal>
