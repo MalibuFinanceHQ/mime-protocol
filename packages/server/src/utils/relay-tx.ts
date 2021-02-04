@@ -6,5 +6,5 @@ export async function relayTx(
   tx: providers.TransactionResponse,
   signer: Signer,
 ) {
-  console.log(relayedTxCopingTraders, tx, signer);
+  console.log(relayedTxCopingTraders, tx);
 }

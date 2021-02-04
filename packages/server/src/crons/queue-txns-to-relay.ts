@@ -2,6 +2,7 @@ import { getManager } from 'typeorm';
 import { providers } from 'ethers';
 import { FollowedTrader } from '../entities/FollowedTrader.entity';
 import { WrappedNodeRedisClient } from 'handy-redis';
+import { getTransactions } from '../utils/jsonRpcGetTransactions';
 
 export async function filterAndQueueRelayableTxnsInBlock(
   blockNumber: number,
@@ -24,10 +25,10 @@ export async function filterAndQueueRelayableTxnsInBlock(
   const block = await provider.getBlockWithTransactions(blockNumber);
 
   // Load block transactions.
-  const blockTransactionsPromises = block.transactions.map((tx) =>
-    provider.getTransaction(tx.hash),
+  const blockTransactions = await getTransactions(
+    block.transactions.map((tx) => tx.hash),
+    (await provider.getNetwork()).chainId,
   );
-  const blockTransactions = await Promise.all(blockTransactionsPromises);
 
   // Filter matching txns.
   const matchingTransactions = blockTransactions.filter((tx) => {
@@ -37,12 +38,6 @@ export async function filterAndQueueRelayableTxnsInBlock(
   console.log('Transactions to relay', matchingTransactions);
 
   for (const tx of matchingTransactions) {
-    // @ts-ignore
-    delete tx.wait;
-
-    // @ts-ignore
-    delete tx.creates;
-
     redis.set(tx.hash, JSON.stringify(tx));
   }
 }
