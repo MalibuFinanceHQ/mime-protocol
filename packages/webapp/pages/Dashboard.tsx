@@ -1,12 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Box, Modal, Button, Card, Heading, Loader } from 'rimble-ui';
-import { NewContractForm } from '../utils/types';
-import NewUserContractForm from './NewUserContractForm';
+import { CopyTradingContract, NewContractForm } from '../utils/types';
+import NewUserContractForm from '../components/NewUserContractForm';
 import { createCopyTradingContract } from '../utils/contract-creation';
 import Context from '../utils/context';
-import UserContractsList from './UserContractsList';
+import UserContractsList from '../components/UserContractsList';
 
-const UserContractsDashboard = (): JSX.Element => {
+export default function Dashboard(): JSX.Element {
     const ctxt = useContext(Context);
 
     const [isOpen, setIsOpen] = useState(false);
@@ -32,8 +32,34 @@ const UserContractsDashboard = (): JSX.Element => {
         setIsLoading(false);
     };
 
-    const contractsList = []; // TODO: fetch from server
+    const [contractsList, setContractsList] = useState(
+        [] as CopyTradingContract[],
+    );
 
+    const fetchCopyTradingContracts = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/contracts?address=${ctxt.account}`,
+        );
+        // TODO: handle errors
+        if (!response.ok) return;
+        const contracts: CopyTradingContract[] = await response.json();
+        setContractsList(contracts);
+        console.log(
+            `Fetched contracts from account ${ctxt.account}`,
+            contracts,
+        );
+    };
+
+    useEffect(() => {
+        let _timeout: NodeJS.Timeout;
+        if (ctxt.account) {
+            fetchCopyTradingContracts();
+            _timeout = setInterval(fetchCopyTradingContracts, 30 * 1000);
+        }
+        return () => clearInterval(_timeout);
+    }, [ctxt.account]);
+
+    if (!ctxt.account) return null;
     return (
         <Box className="App" p={4}>
             <Box>
@@ -75,6 +101,4 @@ const UserContractsDashboard = (): JSX.Element => {
             </Box>
         </Box>
     );
-};
-
-export default UserContractsDashboard;
+}
