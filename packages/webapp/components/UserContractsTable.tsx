@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes, { InferProps } from 'prop-types';
-import { Table } from 'rimble-ui';
+import Link from 'next/link';
+import { Table, Button } from 'rimble-ui';
+import { CopyTradingContract } from '../utils/types';
 
 const UserContractsTable = ({
     contractsList = [],
@@ -11,26 +13,26 @@ const UserContractsTable = ({
                 <tr>
                     <th>Contract address</th>
                     <th>Followed address</th>
-                    <th>Strategy</th>
-                    <th>Copied transactions</th>
-                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Contract</th>
                 </tr>
             </thead>
             <tbody>
                 {contractsList.map(
                     ({
                         address,
-                        followedTrader,
-                        strategy,
-                        copiedTxns,
-                        status,
-                    }) => (
+                        observedAddress,
+                        created,
+                    }: CopyTradingContract) => (
                         <tr key={address}>
                             <td>{address}</td>
-                            <td>{followedTrader}</td>
-                            <td>{strategy}</td>
-                            <td>{copiedTxns}</td>
-                            <td>{status}</td>
+                            <td>{observedAddress}</td>
+                            <td>{created}</td>
+                            <td>
+                                <Link href={`contracts/${address}`}>
+                                    <Button>View</Button>
+                                </Link>
+                            </td>
                         </tr>
                     ),
                 )}

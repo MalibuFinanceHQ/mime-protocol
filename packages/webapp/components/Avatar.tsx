@@ -1,5 +1,5 @@
 import React from 'react';
-import { Blockie, EthAddress, Box } from 'rimble-ui';
+import { Blockie, Box } from 'rimble-ui';
 import PropTypes, { InferProps } from 'prop-types';
 
 const Avatar = ({ address }: InferProps<typeof props>): JSX.Element => (
@@ -13,7 +13,6 @@ const Avatar = ({ address }: InferProps<typeof props>): JSX.Element => (
                 spotcolor: '#000',
             }}
         />
-        {/* <EthAddress address={address} /> */}
     </Box>
 );
 

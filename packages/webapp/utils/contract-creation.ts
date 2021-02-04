@@ -22,7 +22,7 @@ const getFactory = async (signer: Signer): Promise<TradersFactory> => {
     );
 };
 
-const createTradingStrategy = async (
+export const createTradingStrategy = async (
     signer: Signer,
 ): Promise<TradingStrategy> => {
     return new TradingStrategy__factory(signer).deploy();
@@ -39,12 +39,13 @@ export const createCopyTradingContract = async (
         `#createCopyTradingContract following "${followedAddr}", strategy "${strategyName}"`,
     );
     console.log('w/ ctxt', ctxt);
-    const tradingStrategy = await createTradingStrategy(signer);
-    console.log('tradingStrategy', tradingStrategy);
+    // const tradingStrategy = await createTradingStrategy(signer);
+    // console.log('tradingStrategy', tradingStrategy);
     const tx = await factory.createNew(
         followedAddr,
         0,
-        tradingStrategy.address,
+        '0xEE8EF3127A34bdb689a58B07354852daBb7C9c5d',
+        // tradingStrategy.address,
     );
     return tx;
 };
