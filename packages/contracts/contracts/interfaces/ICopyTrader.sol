@@ -17,6 +17,11 @@ interface ICopyTrader {
      */
     event PoolCharged(PoolCharge charge, Pool pool);
 
+    /**
+     * @dev emitted when a certain pool is withdrawn.
+     */
+    event PoolWithdrawn(PoolCharge charge, Pool pool);
+
     event TradingStrategyChange(
         address indexed previousStrategy,
         address indexed newStrategy

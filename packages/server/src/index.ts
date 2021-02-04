@@ -16,6 +16,7 @@ import { copyTradersIndexer } from './indexers/copy-traders-creation.indexer';
 import { AppRoutes } from './api/routes';
 import { filterAndQueueRelayableTxnsInBlock } from './crons/queue-txns-to-relay';
 import { relayQueuedTransactions } from './crons/relay-queued-transactions';
+import { onNewBlockHandler } from './crons/on-new-block-handler';
 
 createConnection().then(() => {
   const app = express();
@@ -38,7 +39,7 @@ createConnection().then(() => {
   copyTradersIndexer(factoryContract);
 
   provider.on('block', (blockNumber: number) => {
-    filterAndQueueRelayableTxnsInBlock(blockNumber, provider, redis);
+    onNewBlockHandler(blockNumber, provider, redis);
   });
 
   // provider.on('pending', (tx) => console.log(tx));

@@ -59,6 +59,12 @@ export class CopyTradingContract extends BaseEntity {
   @OneToMany(() => PoolTopUp, (poolTopUp) => poolTopUp.copyTradingContract)
   public poolTopUps: PoolTopUp[];
 
+  @OneToMany(
+    () => PoolTopUp,
+    (poolWithdrawal) => poolWithdrawal.copyTradingContract,
+  )
+  public poolWithdrawals: PoolTopUp[];
+
   @ManyToMany(() => Transaction, (transaction) => transaction.copiedBy)
   public copiedTxns: Transaction[];
 }

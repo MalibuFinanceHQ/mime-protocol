@@ -2,11 +2,13 @@ import { getManager } from 'typeorm';
 import { providers } from 'ethers';
 import { FollowedTrader } from '../entities/FollowedTrader.entity';
 import { WrappedNodeRedisClient } from 'handy-redis';
-import { getTransactions } from '../utils/jsonRpcGetTransactions';
+import {
+  getTransactions,
+  PrimitiveTransaction,
+} from '../utils/jsonRpcGetTransactions';
 
 export async function filterAndQueueRelayableTxnsInBlock(
-  blockNumber: number,
-  provider: providers.Provider,
+  blockTransactions: PrimitiveTransaction[],
   redis: WrappedNodeRedisClient,
 ) {
   // Db connection.
@@ -19,15 +21,6 @@ export async function filterAndQueueRelayableTxnsInBlock(
     .getMany();
   const followedTradersAddresses = followedTraders.map(
     (trader) => trader.address,
-  );
-
-  // Load block details.
-  const block = await provider.getBlockWithTransactions(blockNumber);
-
-  // Load block transactions.
-  const blockTransactions = await getTransactions(
-    block.transactions.map((tx) => tx.hash),
-    (await provider.getNetwork()).chainId,
   );
 
   // Filter matching txns.

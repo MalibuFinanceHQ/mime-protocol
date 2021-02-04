@@ -41,6 +41,7 @@ abstract contract CopyTraderPools is ICopyTrader {
                 )
             );
         }
+        emit PoolWithdrawn(withdrawal_, Pool.RELAY);
     }
 
     function _withdrawFromOperationPool(PoolCharge memory withdrawal_)
@@ -62,6 +63,7 @@ abstract contract CopyTraderPools is ICopyTrader {
                 )
             );
         }
+        emit PoolWithdrawn(withdrawal_, Pool.OPERATIONS);
     }
 
     function _handleMultipleCharges(

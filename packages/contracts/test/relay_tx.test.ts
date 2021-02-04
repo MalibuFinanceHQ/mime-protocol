@@ -22,7 +22,12 @@ import { parseCopyTraderCreationFromFactory } from './utils/logs-parsers';
 
 import { getTxV } from './utils/get-tx-v';
 import { serializeContractTx } from './utils/serialize-contract-transaction';
-import { arrayify, formatEther, keccak256, serializeTransaction } from 'ethers/lib/utils';
+import {
+  arrayify,
+  formatEther,
+  keccak256,
+  serializeTransaction,
+} from 'ethers/lib/utils';
 
 describe('Relay Transaction: test', function () {
   let accounts: Signer[];
@@ -156,19 +161,22 @@ describe('Relay Transaction: test', function () {
         value: approveTx.value,
         gasLimit: approveTx.gasLimit,
         gasPrice: approveTx.gasPrice,
-        chainId: approveTx.chainId
-      }
+        chainId: approveTx.chainId,
+      };
       const baseSerialized = serializeTransaction(baseTx);
-      const txPreimage = keccak256(baseSerialized)
+      const txPreimage = keccak256(baseSerialized);
 
       console.log('expected address', await followedTrader.getAddress());
 
-
       console.log('Relayed tx preimage: ', txPreimage);
 
-      const v = getTxV(baseTx)
+      const v = getTxV(baseTx);
 
-      const recovered = recoverAddress(txPreimage, { v, r: approveTx.r!, s: approveTx.s! });
+      const recovered = recoverAddress(txPreimage, {
+        v,
+        r: approveTx.r!,
+        s: approveTx.s!,
+      });
       console.log('Ethers recovered address: ', recovered);
 
       console.log('Relaying ...');

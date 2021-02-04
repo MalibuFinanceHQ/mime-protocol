@@ -35,10 +35,12 @@ type PrimitiveKeys<T> = {
 
 type OnlyPrimitives<T> = Pick<T, PrimitiveKeys<T>>;
 
+export type PrimitiveTransaction = OnlyPrimitives<providers.TransactionResponse>;
+
 export async function getTransactions(
   txnsHashes: string[],
   defaultChainId?: number,
-): Promise<OnlyPrimitives<providers.TransactionResponse>[]> {
+): Promise<PrimitiveTransaction[]> {
   const batches: any = [];
   txnsHashes.forEach((hash, index) => {
     batches.push({
