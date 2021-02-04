@@ -6,6 +6,7 @@ export async function validateRelayTx(
   contractInstance: CopyTrader,
   tx: providers.TransactionResponse,
   refundAsset: string,
+  expectedSigner: string,
 ): Promise<{
   valid: boolean;
   gasEstimate?: BigNumber;
@@ -23,6 +24,21 @@ export async function validateRelayTx(
   });
 
   const properV = getTxV(tx);
+
+  const recoveredSigner = utils.recoverAddress(utils.keccak256(txSerialized), {
+    v: properV,
+    r: tx.r!,
+    s: tx.s!,
+  });
+
+  if (
+    recoveredSigner.toLocaleLowerCase() !== expectedSigner.toLocaleLowerCase()
+  ) {
+    console.log(
+      `Invalid signer expected: ${expectedSigner} recovered: ${recoveredSigner}`,
+    );
+    return { valid: false };
+  }
 
   return contractInstance.estimateGas
     .relay(refundAsset, txSerialized, properV, tx.r!, tx.s!)

@@ -1,4 +1,4 @@
-import { Signer, providers, constants } from 'ethers';
+import { Signer, providers, constants, utils } from 'ethers';
 import { CopyTradingContract } from '../entities/CopyTradingContract.entity';
 import { CopyTrader__factory } from '../../../contracts/typechain';
 import { validateRelayTx } from './validate-relay-tx';
@@ -42,6 +42,7 @@ export async function relayTx(
       contract,
       tx,
       AddressZero,
+      followedTrader.address,
     );
 
     if (!valid) {
@@ -57,12 +58,16 @@ export async function relayTx(
       properV!,
       tx.r!,
       tx.s!,
+      {
+        gasLimit: '5000000',
+      },
     );
     txSuccessfullRelayCount++;
-    transactionEntity.relayedInTxns.push(relayTx.hash);
     trader.copiedTxns.push(transactionEntity);
-
-    console.log(`Tx. ${tx.hash} relayed in name of ${trader.address}`);
+    transactionEntity.relayedInTxns.push(relayTx.hash);
+    console.log(
+      `Tx. ${tx.hash} relayed in name of ${trader.address} txHash:${relayTx.hash}`,
+    );
   });
 
   if (txSuccessfullRelayCount > 0) {

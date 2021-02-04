@@ -1,3 +1,4 @@
+import { getAvailableStrategies } from './GetAvailableStrategies';
 import { getUserCopyTraders } from './GetUserCopyTraders';
 
 /**
@@ -8,5 +9,10 @@ export const AppRoutes = [
     path: '/contracts',
     method: 'get',
     action: getUserCopyTraders,
+  },
+  {
+    path: '/strategies',
+    method: 'get',
+    action: getAvailableStrategies,
   },
 ];

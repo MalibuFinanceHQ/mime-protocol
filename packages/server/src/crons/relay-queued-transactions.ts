@@ -27,7 +27,7 @@ export async function relayQueuedTransactions(
 
     const copyTraders = await copyTradersRepository
       .createQueryBuilder('entity')
-      .leftJoin('entity.copiedTxns', 'copiedTxns')
+      .leftJoinAndSelect('entity.copiedTxns', 'copiedTxns')
       .leftJoinAndSelect('entity.followedTrader', 'followedTrader')
       .where('followedTrader.address = :from', {
         from: tx.from.toLocaleLowerCase(),
