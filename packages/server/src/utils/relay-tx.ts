@@ -6,5 +6,10 @@ export async function relayTx(
   tx: providers.TransactionResponse,
   signer: Signer,
 ) {
-  console.log(relayedTxCopingTraders, tx);
+  console.log(
+    'This transaction should be coppied -> ',
+    tx,
+    'By : ',
+    relayedTxCopingTraders.map((trader) => trader.address),
+  );
 }
