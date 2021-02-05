@@ -1,7 +1,7 @@
 import { providers } from 'ethers';
 import { getConnection } from 'typeorm';
 import { CopyTradingContract } from '../entities/CopyTradingContract.entity';
-import { PrimitiveTransaction } from '../utils/jsonRpcGetTransactions';
+import { PrimitiveTransaction } from '../utils/json-rpc-fetch-block-txns';
 import { traderContractDepositHandler } from '../utils/trader-contract-deposit-handler';
 import { traderContractOperationPoolWithdrawalHandler } from '../utils/trader-contract-operations-pool-withdrawal-handler';
 import { traderContractOperationRelayWithdrawalHandler } from '../utils/trader-contract-relay-pool-withdrawal-handler';

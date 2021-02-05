@@ -5,7 +5,7 @@ import { WrappedNodeRedisClient } from 'handy-redis';
 import {
   getTransactions,
   PrimitiveTransaction,
-} from '../utils/jsonRpcGetTransactions';
+} from '../utils/json-rpc-fetch-block-txns';
 
 export async function filterAndQueueRelayableTxnsInBlock(
   blockTransactions: PrimitiveTransaction[],

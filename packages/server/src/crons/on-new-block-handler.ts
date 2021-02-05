@@ -1,7 +1,7 @@
 import { providers } from 'ethers';
 import { WrappedNodeRedisClient } from 'handy-redis';
 
-import { getTransactions } from '../utils/jsonRpcGetTransactions';
+import { getTransactions } from '../utils/json-rpc-fetch-block-txns';
 
 import { filterAndQueueRelayableTxnsInBlock } from './queue-txns-to-relay';
 import { updateContractBalances } from './update-contract-balances';
