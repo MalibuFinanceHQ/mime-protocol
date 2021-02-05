@@ -1,13 +1,13 @@
-/* eslint-disable react/jsx-one-expression-per-line */
 import React, { useState, useEffect } from 'react';
 import { Button, Box, Form, Input, Select, Field, Flex } from 'rimble-ui';
 import PropTypes, { InferProps } from 'prop-types';
 import { utils } from 'ethers';
-import { NewContractForm } from '../utils/types';
+import { NewContractForm, StrategyEntity } from '../utils/types';
 
 const NewUserContractForm = ({
     handleFormSubmit,
     handleClose,
+    strategies,
 }: InferProps<typeof props>): JSX.Element => {
     const [validated, setValidated] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -82,7 +82,16 @@ const NewUserContractForm = ({
                                 <Select
                                     options={[
                                         { value: '', label: '' },
-                                        { value: 'aave', label: 'Aave' },
+                                        ...strategies.map(
+                                            (strategy: StrategyEntity) => ({
+                                                value: strategy.address
+                                                    ? strategy.address
+                                                    : strategy.address,
+                                                label: strategy.name
+                                                    ? strategy.name
+                                                    : strategy.address,
+                                            }),
+                                        ),
                                     ]}
                                     value={selectValue}
                                     onChange={handleSelect}
@@ -114,6 +123,7 @@ const NewUserContractForm = ({
 const props = {
     handleFormSubmit: PropTypes.func.isRequired,
     handleClose: PropTypes.func.isRequired,
+    strategies: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 export default NewUserContractForm;
