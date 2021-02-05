@@ -9,12 +9,13 @@ import {
   PrimaryGeneratedColumn,
   Column,
   Index,
+  ManyToOne,
 } from 'typeorm';
 import { CopyTradingContract } from './CopyTradingContract.entity';
 
 import { BigNumberish } from 'ethers';
 
-import { TopUpPool } from '../common/enums';
+import { CopyTraderPool } from '../common/enums';
 
 @Entity()
 export class PoolWithdraw extends BaseEntity {
@@ -28,8 +29,8 @@ export class PoolWithdraw extends BaseEntity {
   @Column({ type: 'bigint' })
   public amount: BigNumberish;
 
-  @Column({ type: 'enum', enum: TopUpPool })
-  public targetPool: TopUpPool;
+  @Column({ type: 'enum', enum: CopyTraderPool })
+  public targetPool: CopyTraderPool;
 
   @CreateDateColumn()
   public createdAt: Date;
@@ -42,10 +43,9 @@ export class PoolWithdraw extends BaseEntity {
 
   // Relations
 
-  @OneToMany(
+  @ManyToOne(
     () => CopyTradingContract,
     (copyTradingContract) => copyTradingContract.poolWithdrawals,
   )
-  @JoinColumn()
   public copyTradingContract: CopyTradingContract;
 }

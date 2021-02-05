@@ -15,6 +15,8 @@ import { PoolTopUp } from './PoolTopUp.entity';
 import { Strategy } from './Strategy.entity';
 import { User } from './User.entity';
 import { Transaction } from './Transaction.entity';
+import { BigNumberish } from 'ethers';
+import { PoolWithdraw } from './PoolWithdraw.entity';
 
 // @dev CopyTradingContract represents an EOA following some other trader.s's strategy.ies.
 @Entity()
@@ -26,10 +28,10 @@ export class CopyTradingContract extends BaseEntity {
   public address: string;
 
   @Column({ type: 'jsonb', nullable: true, default: {} })
-  public relayPoolsBalances: Record<string, string>;
+  public relayPoolsBalances: Record<string, BigNumberish | undefined>;
 
   @Column({ type: 'jsonb', nullable: true, default: {} })
-  public operationsPoolsBalances: Record<string, string>;
+  public operationsPoolsBalances: Record<string, BigNumberish | undefined>;
 
   @Column({ type: 'int' })
   public relaySinceNonce: number;
@@ -60,10 +62,10 @@ export class CopyTradingContract extends BaseEntity {
   public poolTopUps: PoolTopUp[];
 
   @OneToMany(
-    () => PoolTopUp,
+    () => PoolWithdraw,
     (poolWithdrawal) => poolWithdrawal.copyTradingContract,
   )
-  public poolWithdrawals: PoolTopUp[];
+  public poolWithdrawals: PoolWithdraw[];
 
   @ManyToMany(() => Transaction, (transaction) => transaction.copiedBy)
   public copiedTxns: Transaction[];

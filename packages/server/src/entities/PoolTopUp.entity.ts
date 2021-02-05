@@ -1,12 +1,21 @@
 import {
-  Entity, JoinColumn, OneToMany, BaseEntity,
-  CreateDateColumn, DeleteDateColumn, UpdateDateColumn, PrimaryGeneratedColumn, Column, Index,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  BaseEntity,
+  CreateDateColumn,
+  DeleteDateColumn,
+  UpdateDateColumn,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  ManyToOne,
 } from 'typeorm';
 import { CopyTradingContract } from './CopyTradingContract.entity';
 
 import { BigNumberish } from 'ethers';
 
-import { TopUpPool } from '../common/enums';
+import { CopyTraderPool } from '../common/enums';
 
 @Entity()
 export class PoolTopUp extends BaseEntity {
@@ -14,14 +23,14 @@ export class PoolTopUp extends BaseEntity {
   public id: number;
 
   @Index()
-  @Column({ type: 'varchar', })
+  @Column({ type: 'varchar' })
   public asset: string;
 
   @Column({ type: 'bigint' })
   public amount: BigNumberish;
 
-  @Column({ type: 'enum', enum: TopUpPool })
-  public targetPool: TopUpPool;
+  @Column({ type: 'enum', enum: CopyTraderPool })
+  public targetPool: CopyTraderPool;
 
   @CreateDateColumn()
   public createdAt: Date;
@@ -34,7 +43,9 @@ export class PoolTopUp extends BaseEntity {
 
   // Relations
 
-  @OneToMany(() => CopyTradingContract, copyTradingContract => copyTradingContract.poolTopUps)
-  @JoinColumn()
+  @ManyToOne(
+    () => CopyTradingContract,
+    (copyTradingContract) => copyTradingContract.poolTopUps,
+  )
   public copyTradingContract: CopyTradingContract;
 }

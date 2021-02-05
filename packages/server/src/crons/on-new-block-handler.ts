@@ -21,5 +21,5 @@ export async function onNewBlockHandler(
   );
 
   filterAndQueueRelayableTxnsInBlock(blockTransactions, redis);
-  updateContractBalances(blockTransactions);
+  updateContractBalances(provider, blockTransactions);
 }

@@ -1,2 +1,9 @@
-export enum TopUpPool { OPERATIONS, RELAY }
-export enum RelayerTransactionStatus { PENDING, THROWN, RELAYED }
+export enum CopyTraderPool {
+  RELAY,
+  OPERATIONS,
+}
+export enum RelayerTransactionStatus {
+  PENDING,
+  THROWN,
+  RELAYED,
+}

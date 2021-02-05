@@ -28,8 +28,6 @@ export async function filterAndQueueRelayableTxnsInBlock(
     return followedTradersAddresses.includes(tx.from.toLocaleLowerCase());
   });
 
-  console.log('Transactions to relay', matchingTransactions);
-
   for (const tx of matchingTransactions) {
     redis.set(tx.hash, JSON.stringify(tx));
   }

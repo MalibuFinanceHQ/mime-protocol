@@ -8,7 +8,10 @@ import {
   ReplaceERC20ApproveSpenderManipulator__factory,
   TradingStrategy__factory,
   PricesLib__factory,
+  MockDAI__factory,
 } from '../typechain';
+
+import { constants } from 'ethers';
 
 async function main() {
   let nonce = await (await ethers.getSigners())[0].getTransactionCount();
@@ -84,7 +87,39 @@ async function main() {
     'TradingStrategy',
   )) as TradingStrategy__factory;
   const tradingStrategy = await TradingStrategy.deploy({ nonce });
+  nonce++;
   console.log('Deployed Trading Strategy: ', tradingStrategy.address);
+
+  // Deploy DAI mock.
+  console.log('Deploying mock dai ...');
+  const MockDAI = (await ethers.getContractFactory(
+    'MockDAI',
+  )) as MockDAI__factory;
+  const name = 'Mocked Dai stablecoin';
+  const symbol = 'DAI';
+  const mockDai = await MockDAI.deploy(
+    name,
+    symbol,
+    constants.MaxUint256.toHexString(),
+    { nonce },
+  );
+  nonce++;
+  console.log(`Mock DAI deployed at ${mockDai.address}`);
+
+  // Mark Uniswap router as allowed DAI spender in ERC20.approve manipulator whitelist.
+  await checkErc20ApproveManipulator.whitelist(
+    '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
+    { nonce },
+  );
+  nonce++;
+
+  // Link ERC20.approve manipulator in strategy.
+  await tradingStrategy.setManipulator(
+    mockDai.address,
+    '0x095ea7b3',
+    checkErc20ApproveManipulator.address,
+    { nonce },
+  );
 }
 
 main()

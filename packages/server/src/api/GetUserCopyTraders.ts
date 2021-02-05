@@ -32,6 +32,8 @@ export async function getUserCopyTraders(request: Request, response: Response) {
       address: contract.address,
       observedAddress: contract.followedTrader.address,
       created: contract.createdAt.toDateString(),
+      operationsPoolsBalances: contract.operationsPoolsBalances,
+      relayPoolsBalances: contract.relayPoolsBalances,
     })),
   );
 }

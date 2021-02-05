@@ -1,8 +1,13 @@
+import { providers } from 'ethers';
 import { getConnection } from 'typeorm';
 import { CopyTradingContract } from '../entities/CopyTradingContract.entity';
 import { PrimitiveTransaction } from '../utils/jsonRpcGetTransactions';
+import { traderContractDepositHandler } from '../utils/trader-contract-deposit-handler';
+import { traderContractOperationPoolWithdrawalHandler } from '../utils/trader-contract-operations-pool-withdrawal-handler';
+import { traderContractOperationRelayWithdrawalHandler } from '../utils/trader-contract-relay-pool-withdrawal-handler';
 
 export async function updateContractBalances(
+  provider: providers.Provider,
   blockTransactions: PrimitiveTransaction[],
 ) {
   const copyTradingContractRepository = getConnection().getRepository(
@@ -13,6 +18,7 @@ export async function updateContractBalances(
     .createQueryBuilder('entity')
     .select('entity.address')
     .getMany();
+
   const copyTraderContractsAddresses = copyTradersContracts.map((trader) =>
     trader.address.toLocaleLowerCase(),
   );
@@ -46,5 +52,31 @@ export async function updateContractBalances(
       )
         return true;
     },
+  );
+
+  // Handle actions.
+
+  copyTradersDepositsTxns.forEach((tx, index) =>
+    traderContractDepositHandler(
+      tx.hash,
+      provider,
+      copyTraderContractsAddresses[index],
+    ),
+  );
+
+  copyTradersOperationPoolsWithdrawalsTxns.forEach((tx, index) =>
+    traderContractOperationPoolWithdrawalHandler(
+      tx.hash,
+      provider,
+      copyTraderContractsAddresses[index],
+    ),
+  );
+
+  copyTradersRelayPoolsWithdrawalsTxns.forEach((tx, index) =>
+    traderContractOperationRelayWithdrawalHandler(
+      tx.hash,
+      provider,
+      copyTraderContractsAddresses[index],
+    ),
   );
 }
