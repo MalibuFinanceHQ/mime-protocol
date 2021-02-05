@@ -1,4 +1,4 @@
-import { Signer, providers, constants, utils } from 'ethers';
+import { Signer, providers, constants, utils, BigNumber } from 'ethers';
 import { CopyTradingContract } from '../entities/CopyTradingContract.entity';
 import { CopyTrader__factory } from '../../../contracts/typechain';
 import { validateRelayTx } from './validate-relay-tx';
@@ -7,6 +7,7 @@ import { FollowedTrader } from '../entities/FollowedTrader.entity';
 import { Transaction } from '../entities/Transaction.entity';
 
 const { AddressZero } = constants;
+const DEFAULT_REFUND_ASSET = AddressZero;
 
 export async function relayTx(
   relayedTxCopingTraders: CopyTradingContract[],
@@ -41,7 +42,7 @@ export async function relayTx(
     const { valid, gasEstimate, txSerialized, properV } = await validateRelayTx(
       contract,
       tx,
-      AddressZero,
+      DEFAULT_REFUND_ASSET,
       followedTrader.address,
     );
 
@@ -50,10 +51,22 @@ export async function relayTx(
       return;
     }
 
+    const txCost = gasEstimate?.mul(tx.gasPrice);
+    if (
+      !trader.relayPoolsBalances[DEFAULT_REFUND_ASSET] ||
+      BigNumber.from(trader.relayPoolsBalances[DEFAULT_REFUND_ASSET]).lt(
+        txCost!,
+      )
+    ) {
+      console.log(
+        `Trader ${trader.address} couldn't afford to refund relay of tx. ${tx.hash}`,
+      );
+    }
+
     console.log(`Relaying tx. ${tx.hash} in name of ${trader.address} ...`);
 
     const relayTx = await contract.relay(
-      AddressZero,
+      DEFAULT_REFUND_ASSET,
       txSerialized!,
       properV!,
       tx.r!,
