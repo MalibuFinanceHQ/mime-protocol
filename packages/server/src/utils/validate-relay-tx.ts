@@ -48,7 +48,12 @@ export async function validateRelayTx(
       gasEstimate,
       properV,
     }))
-    .catch(() => ({
-      valid: false,
-    }));
+    .catch((e) => {
+      console.log(e);
+      return {
+        valid: false,
+        txSerialized,
+        properV,
+      };
+    });
 }
