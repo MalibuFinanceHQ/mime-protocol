@@ -27,6 +27,9 @@ const config: HardhatUserConfig = {
     ],
   },
   networks: {
+    development: {
+      url: 'http://localhost:7545',
+    },
     hardhat: {
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
