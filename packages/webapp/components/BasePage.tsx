@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import MetaMaskAuth from '../components/MetaMaskAuth';
 import Context, { defaultCtxt } from '../utils/context';
 import PropTypes, { InferProps } from 'prop-types';
+import { CopyTradingContract } from '../utils/types';
 
 export default function BasePage({
     children,
@@ -50,9 +51,31 @@ export default function BasePage({
         });
     };
 
+    const fetchCopyTradingContracts = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/contracts?address=${ctxt.account}`,
+        );
+        // TODO: handle errors
+        if (!response.ok) return;
+        const contracts: CopyTradingContract[] = await response.json();
+        console.log(
+            `Fetched contracts from account ${ctxt.account}`,
+            contracts,
+        );
+        setCtxt({
+            ...ctxt,
+            contracts,
+        });
+    };
+
     useEffect(() => {
-        initProvider();
-    }, []);
+        // let _timeout: NodeJS.Timeout;
+        if (ctxt.account) {
+            fetchCopyTradingContracts();
+            // _timeout = setInterval(fetchCopyTradingContracts, 30 * 1000);
+        } else initProvider();
+        // return () => clearInterval(_timeout);
+    }, [ctxt.account]);
 
     return (
         <Context.Provider value={ctxt}>

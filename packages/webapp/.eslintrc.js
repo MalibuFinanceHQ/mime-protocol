@@ -24,5 +24,6 @@ module.exports = {
         'react/jsx-filename-extension': 0,
         'no-use-before-define': 0,
         'react/jsx-pascal-case': 0,
+        '@typescript-eslint/ban-ts-comment': 0
     },
 };

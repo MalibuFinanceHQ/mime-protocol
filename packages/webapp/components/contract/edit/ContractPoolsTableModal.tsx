@@ -10,12 +10,32 @@ import { CopyTrader } from '../../../typechain';
 const ContractPoolsTableModal = ({
     isOpen,
     curAction,
-    close,
+    closeModal,
     contract,
 }: InferProps<typeof props>): JSX.Element => {
-    const closeModal = (e: React.SyntheticEvent) => {
+    const handleClose = (e: React.SyntheticEvent) => {
         e.preventDefault();
-        close();
+        closeModal();
+    };
+
+    const renderCurAction = (curAction: AssetAction, contract: CopyTrader) => {
+        switch (curAction.actionName) {
+            case 'Top up':
+                return (
+                    <TopUp
+                        curAction={curAction}
+                        contract={contract}
+                        closeModal={handleClose}
+                    />
+                );
+            case 'Withdraw':
+                return <Withdraw curAction={curAction} contract={contract} />;
+            case 'Add asset':
+                return <AddAsset curAction={curAction} contract={contract} />;
+            default:
+                console.error(curAction);
+                throw new Error('Unsupported action');
+        }
     };
 
     return (
@@ -30,7 +50,7 @@ const ContractPoolsTableModal = ({
                     right={0}
                     mt={3}
                     mr={3}
-                    onClick={closeModal}
+                    onClick={handleClose}
                 />
                 {curAction
                     ? renderCurAction(
@@ -52,24 +72,10 @@ const ContractPoolsTableModal = ({
     );
 };
 
-const renderCurAction = (curAction: AssetAction, contract: CopyTrader) => {
-    switch (curAction.actionName) {
-        case 'Top up':
-            return <TopUp curAction={curAction} contract={contract} />;
-        case 'Withdraw':
-            return <Withdraw curAction={curAction} contract={contract} />;
-        case 'Add asset':
-            return <AddAsset curAction={curAction} contract={contract} />;
-        default:
-            console.error(curAction);
-            throw new Error('Unsupported action');
-    }
-};
-
 const props = {
     isOpen: PropTypes.bool.isRequired,
     curAction: PropTypes.object.isRequired,
-    close: PropTypes.func.isRequired,
+    closeModal: PropTypes.func.isRequired,
     contract: PropTypes.object.isRequired,
 };
 
