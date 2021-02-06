@@ -49,7 +49,6 @@ export async function validateRelayTx(
       properV,
     }))
     .catch((e) => {
-      console.log(e);
       return {
         valid: false,
         txSerialized,

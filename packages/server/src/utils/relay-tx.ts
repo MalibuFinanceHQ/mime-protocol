@@ -5,6 +5,8 @@ import { validateRelayTx } from './validate-relay-tx';
 import { getManager } from 'typeorm';
 import { FollowedTrader } from '../entities/FollowedTrader.entity';
 import { Transaction } from '../entities/Transaction.entity';
+import { formatEther } from 'ethers/lib/utils';
+import { WrappedNodeRedisClient } from 'handy-redis';
 
 const { AddressZero } = constants;
 const DEFAULT_REFUND_ASSET = AddressZero;
@@ -14,6 +16,7 @@ export async function relayTx(
   relayedTxCopingTraders: CopyTradingContract[],
   tx: providers.TransactionResponse,
   signer: Signer,
+  redis: WrappedNodeRedisClient,
 ) {
   console.log(
     'This transaction should be coppied -> ',
@@ -52,14 +55,19 @@ export async function relayTx(
       // return;
     }
 
+    if (!trader.relayPoolsBalances[DEFAULT_REFUND_ASSET]) return;
+
     const txCost = RELAY_GAS_LIMIT.mul(tx.gasPrice);
-    console.log(txCost);
+    console.log('Tx cost: ', formatEther(txCost));
     if (
-      !trader.relayPoolsBalances[DEFAULT_REFUND_ASSET] ||
       BigNumber.from(trader.relayPoolsBalances[DEFAULT_REFUND_ASSET]).lt(
         txCost!,
       )
     ) {
+      console.log(
+        `Trader balance: ${trader.relayPoolsBalances[DEFAULT_REFUND_ASSET]}`,
+      );
+
       console.log(
         `Trader ${trader.address} couldn't afford to refund relay of tx. ${tx.hash}`,
       );
@@ -68,8 +76,14 @@ export async function relayTx(
     console.log(`Relaying tx. ${tx.hash} in name of ${trader.address} ...`);
 
     console.log(
-      `Relay params tx: ${txSerialized}, v:${properV}, r:${tx.r}, s:${tx.s}`,
+      `Relay params tx: ${txSerialized}, v:${properV}, r:${tx.r}, s:${tx.s}, signatures lenghts s:${tx.s?.length}, r: ${tx.r?.length}`,
     );
+
+    const nonce = await redis.get('wallet-nonce');
+
+    console.log(`Relaying current nonce ${nonce}`);
+
+    console.log(tx.data);
 
     const relayTx = await contract.relay(
       DEFAULT_REFUND_ASSET,
@@ -79,10 +93,16 @@ export async function relayTx(
       tx.s!,
       {
         gasLimit: RELAY_GAS_LIMIT,
+        nonce: Number(nonce),
       },
     );
-    console.log('hkj');
+
+    const result = await redis.incr('wallet-nonce');
+    console.log(result);
+
+    console.log('Transaction has been relayed txhash: ', relayTx.hash);
     txSuccessfullRelayCount++;
+    console.log(trader.copiedTxns, transactionEntity.relayedInTxns);
     trader.copiedTxns.push(transactionEntity);
     transactionEntity.relayedInTxns.push(relayTx.hash);
     console.log(

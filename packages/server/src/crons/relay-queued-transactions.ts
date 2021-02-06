@@ -19,6 +19,8 @@ export async function relayQueuedTransactions(
 
   // Sort txns.
   txnsHashesToRelay.forEach(async (txHash) => {
+    if (txHash === 'wallet-nonce') return;
+
     const txString = await redis.get(txHash);
     if (!txString) {
       return;
@@ -37,7 +39,7 @@ export async function relayQueuedTransactions(
 
     relayedTxCopingTraders[txHash] = copyTraders;
 
-    await relayTx(copyTraders, tx, signer);
+    await relayTx(copyTraders, tx, signer, redis);
     await redis.del(txHash);
   });
 }

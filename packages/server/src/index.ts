@@ -18,7 +18,7 @@ import { filterAndQueueRelayableTxnsInBlock } from './crons/queue-txns-to-relay'
 import { relayQueuedTransactions } from './crons/relay-queued-transactions';
 import { onNewBlockHandler } from './crons/on-new-block-handler';
 
-createConnection().then(() => {
+createConnection().then(async () => {
   const app = express();
   app.use(express.json());
   app.use(cors());
@@ -34,6 +34,11 @@ createConnection().then(() => {
   const redis = createNodeRedisClient({
     url: process.env.REDIS_URL,
   });
+
+  // Cache signer nonce.
+  const nonce = (await wallet.getTransactionCount()).toString();
+  await redis.set('wallet-nonce', nonce);
+  console.log(`Initialzing wallet current nonce ${nonce}`);
 
   // Start indexers
   copyTradersIndexer(factoryContract);
