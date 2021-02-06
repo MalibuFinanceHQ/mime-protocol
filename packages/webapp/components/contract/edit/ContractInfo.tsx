@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes, { InferProps } from 'prop-types';
 import Link from 'next/link';
 import { Loader, Box, Card, Heading, Text, EthAddress, Icon } from 'rimble-ui';
 import ContractEditForm from './Form';
 import RelayedTxns from './RelayedTxns';
+import { CopyTrader } from '../../../typechain';
 
 // Mock data
 const TXNS_LIST = [
@@ -33,6 +34,18 @@ const ContractInfo = ({
     observedAddress,
     updateObservedAddress,
 }: InferProps<typeof props>): JSX.Element => {
+    const [strategyAddress, setStrategyAddress] = useState('');
+
+    const fetchStrategyAddress = async () => {
+        const addr = await (contract as CopyTrader).tradingStrategy();
+        console.log('contract strategy', addr);
+        setStrategyAddress(addr);
+    };
+
+    useEffect(() => {
+        fetchStrategyAddress();
+    }, []);
+
     return (
         <Card width={'auto'} mt={25} mx={'auto'} px={[3, 3, 4]}>
             <Link href="/">
@@ -44,6 +57,10 @@ const ContractInfo = ({
                     <Box>
                         <Text>Contract address</Text>
                         <EthAddress address={address} />
+                    </Box>
+                    <Box mt={25}>
+                        <Text>Strategy address</Text>
+                        <EthAddress address={strategyAddress} />
                     </Box>
                     <ContractEditForm
                         contract={contract}
