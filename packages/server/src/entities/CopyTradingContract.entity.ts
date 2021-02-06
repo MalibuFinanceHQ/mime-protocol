@@ -58,12 +58,15 @@ export class CopyTradingContract extends BaseEntity {
   @ManyToOne(() => FollowedTrader)
   public followedTrader: FollowedTrader;
 
-  @OneToMany(() => PoolTopUp, (poolTopUp) => poolTopUp.copyTradingContract)
+  @OneToMany((type) => PoolTopUp, (topup) => topup.copyTradingContract, {
+    cascade: true,
+  })
   public poolTopUps: PoolTopUp[];
 
   @OneToMany(
-    () => PoolWithdraw,
-    (poolWithdrawal) => poolWithdrawal.copyTradingContract,
+    (type) => PoolWithdraw,
+    (withdrawal) => withdrawal.copyTradingContract,
+    { cascade: true },
   )
   public poolWithdrawals: PoolWithdraw[];
 

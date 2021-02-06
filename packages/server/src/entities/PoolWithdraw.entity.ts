@@ -26,7 +26,7 @@ export class PoolWithdraw extends BaseEntity {
   @Column({ type: 'varchar' })
   public asset: string;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'varchar' })
   public amount: BigNumberish;
 
   @Column({ type: 'enum', enum: CopyTraderPool })
@@ -44,7 +44,7 @@ export class PoolWithdraw extends BaseEntity {
   // Relations
 
   @ManyToOne(
-    () => CopyTradingContract,
+    (type) => CopyTradingContract,
     (copyTradingContract) => copyTradingContract.poolWithdrawals,
   )
   public copyTradingContract: CopyTradingContract;
