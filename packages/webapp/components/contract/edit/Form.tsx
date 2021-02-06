@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Box, Flex, Form, Input, Field, ToastMessage } from 'rimble-ui';
-import { utils } from 'ethers';
+import {
+    Button,
+    Box,
+    Flex,
+    Form,
+    Input,
+    Field,
+    ToastMessage,
+    Select,
+} from 'rimble-ui';
+import { ethers, utils } from 'ethers';
 import PropTypes, { InferProps } from 'prop-types';
 import { CopyTrader } from '../../../typechain';
 
@@ -11,7 +20,9 @@ const ContractEditForm = ({
 }: InferProps<typeof props>): JSX.Element => {
     const [validated, setValidated] = useState(false);
     const [inputValue, setInputValue] = useState(observedAddres);
+    const [selectValue, setSelectValue] = useState('Eth');
     const [txState, setTxState] = useState('none');
+    const [feesPaymentAsset, setFeesPaymentAsset] = useState(null);
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const target = e.target as HTMLInputElement;
@@ -35,12 +46,36 @@ const ContractEditForm = ({
     const handleSubmit = async (e: React.SyntheticEvent) => {
         try {
             e.preventDefault();
-            setTxState('pending');
-            const receipt = await (contract as CopyTrader).follow(inputValue);
-            await receipt.wait();
-            console.log('follow receipt', receipt);
-            setTxState('complete');
-            updateObservedAddress(inputValue);
+
+            // Update fees asset if needed
+            if (selectValue !== feesPaymentAsset) {
+                setTxState('pending');
+
+                const receipt = await (contract as CopyTrader).setFeesPaymentsAsset(
+                    selectValue,
+                );
+                await receipt.wait();
+                console.log('setFeesPaymentsAsset receipt', receipt);
+                setFeesPaymentAsset(selectValue);
+
+                setTxState('complete');
+            }
+
+            // Follow if needed
+            if (inputValue !== observedAddres) {
+                setTxState('pending');
+
+                const receipt = await (contract as CopyTrader).follow(
+                    inputValue,
+                );
+                await receipt.wait();
+                console.log('follow receipt', receipt);
+
+                updateObservedAddress(inputValue);
+
+                setTxState('complete');
+            }
+
             setTimeout(() => setTxState('none'), 3000);
         } catch (err) {
             if (err) console.error(err);
@@ -54,9 +89,22 @@ const ContractEditForm = ({
         console.log('handleLock');
     };
 
+    const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSelectValue(e.target.value);
+        validateInput(e);
+    };
+
+    const initFeesPaymentAsset = async () => {
+        const contractFeesPaymentAsset = await (contract as CopyTrader).feesPaymentsAsset();
+        console.log('contractFeesPaymentAsset ->', contractFeesPaymentAsset);
+        setSelectValue(contractFeesPaymentAsset);
+        setFeesPaymentAsset(contractFeesPaymentAsset);
+    };
+
     useEffect(() => {
         validateForm();
-    }, [inputValue, contract]);
+        if (!feesPaymentAsset) initFeesPaymentAsset();
+    }, [inputValue, contract, feesPaymentAsset]);
 
     return (
         <Box mt={25}>
@@ -70,13 +118,41 @@ const ContractEditForm = ({
                         width={1}
                     />
                 </Field>
+
+                <Field
+                    label="Asset used to pay transaction fees"
+                    validated={validated}
+                    width={1}
+                >
+                    <Select
+                        options={[
+                            {
+                                value: ethers.constants.AddressZero,
+                                label: 'Eth',
+                            },
+                            {
+                                value:
+                                    '0x6354B18b6ED52FBdC8abcD3fFbc65565cbfa8364',
+                                label: 'Dai',
+                            },
+                        ]}
+                        value={selectValue}
+                        onChange={handleSelect}
+                        required
+                        width={1}
+                        selected={'aave'}
+                    />
+                </Field>
                 <Flex alignItems="center">
                     <Button
                         icon="Save"
                         width={[1, 'auto', 'auto']}
                         mr={3}
                         disabled={
-                            txState !== 'none' || inputValue === observedAddres
+                            (txState !== 'none' &&
+                                selectValue === feesPaymentAsset) ||
+                            (inputValue === observedAddres &&
+                                selectValue === feesPaymentAsset)
                         }
                     >
                         Update contract

@@ -7,11 +7,11 @@ import { NewContractForm, StrategyEntity } from '../utils/types';
 const NewUserContractForm = ({
     handleFormSubmit,
     handleClose,
-    strategies,
 }: InferProps<typeof props>): JSX.Element => {
     const [validated, setValidated] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [selectValue, setSelectValue] = useState('');
+    const [strategies, setStrategies] = useState([]);
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const target = e.target as HTMLInputElement;
@@ -49,6 +49,21 @@ const NewUserContractForm = ({
             strategyName: selectValue,
         } as NewContractForm);
     };
+
+    const fetchStrategies = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/strategies`,
+        );
+        // TODO: handle errors
+        if (!response.ok) return;
+        const strategies: StrategyEntity[] = await response.json();
+        console.log(`Fetched strategies`, strategies);
+        setStrategies(strategies);
+    };
+
+    useEffect(() => {
+        fetchStrategies();
+    }, []);
 
     return (
         <Box p={4} width="auto">
@@ -123,7 +138,6 @@ const NewUserContractForm = ({
 const props = {
     handleFormSubmit: PropTypes.func.isRequired,
     handleClose: PropTypes.func.isRequired,
-    strategies: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 export default NewUserContractForm;

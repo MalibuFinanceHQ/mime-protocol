@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import PropTypes, { InferProps } from 'prop-types';
+import { BigNumber } from 'ethers';
 import { Table, Icon, Flex, Button, Link, Tooltip } from 'rimble-ui';
 import ContractPoolsTableModal from './ContractPoolsTableModal';
-import { AssetRow, AssetAction } from '../../../utils/types';
+import { AssetRow, AssetAction, PoolType } from '../../../utils/types';
+import Context from '../../../utils/context';
 
 const ContractPoolsTable = ({
     assetsList = [],
@@ -21,6 +23,42 @@ const ContractPoolsTable = ({
 
     const [isOpen, setIsOpen] = useState(false);
     const [curAction, setCurAction] = useState(null);
+    console.log('contract', contract?.address);
+    const ctxt = useContext(Context);
+    console.log(ctxt.contracts);
+    let assets = assetsList;
+    if (contract?.address) {
+        assets = assetsList.map((asset: AssetRow) => {
+            let balance = 0;
+            const c = ctxt.contracts.find(
+                (c) => c.address === contract.address,
+            );
+            if (!c) {
+                return {
+                    ...asset,
+                    balance,
+                };
+            }
+            let hexBalance: string | undefined;
+            if (asset.poolType === PoolType.OPERATIONS) {
+                // @ts-ignore
+                hexBalance = c.operationsPoolsBalances[asset.assetAddress];
+                balance = hexBalance
+                    ? BigNumber.from(hexBalance).toNumber()
+                    : 0;
+            } else if (asset.poolType === PoolType.RELAY) {
+                // @ts-ignore
+                hexBalance = c.relayPoolsBalances[asset.assetAddress];
+                balance = hexBalance
+                    ? BigNumber.from(hexBalance).toNumber()
+                    : 0;
+            }
+            return {
+                ...asset,
+                balance,
+            };
+        });
+    }
 
     return (
         <>
@@ -35,7 +73,7 @@ const ContractPoolsTable = ({
                     </tr>
                 </thead>
                 <tbody>
-                    {(assetsList as AssetRow[]).map((ar: AssetRow) => (
+                    {(assets as AssetRow[]).map((ar: AssetRow) => (
                         <tr key={ar.assetAddress}>
                             <td>
                                 <Tooltip
@@ -58,7 +96,11 @@ const ContractPoolsTable = ({
                                 </Link>
                             </td>
                             <td>{ar.balance}</td>
-                            <td>{ar.poolType}</td>
+                            <td>
+                                {ar.poolType === PoolType.OPERATIONS
+                                    ? 'OPERATIONS'
+                                    : 'RELAY'}
+                            </td>
                             <td>
                                 <Flex alignItems="center">
                                     <Button
@@ -89,7 +131,7 @@ const ContractPoolsTable = ({
                     ))}
                 </tbody>
             </Table>
-            <Button
+            {/* <Button
                 mt={25}
                 icon="AddCircle"
                 width={[1, 'auto', 'auto']}
@@ -99,11 +141,11 @@ const ContractPoolsTable = ({
                 }
             >
                 Add asset
-            </Button>
+            </Button> */}
             <ContractPoolsTableModal
                 isOpen={isOpen}
                 curAction={curAction}
-                close={() => {
+                closeModal={() => {
                     setCurAction(null);
                     setIsOpen(false);
                 }}
@@ -115,7 +157,7 @@ const ContractPoolsTable = ({
 
 const props = {
     assetsList: PropTypes.arrayOf(PropTypes.object).isRequired,
-    contract: PropTypes.object.isRequired,
+    contract: PropTypes.any.isRequired,
 };
 
 export default ContractPoolsTable;
