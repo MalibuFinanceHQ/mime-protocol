@@ -43,8 +43,8 @@ const ContractInfo = ({
     };
 
     useEffect(() => {
-        fetchStrategyAddress();
-    }, []);
+        if (contract && !strategyAddress) fetchStrategyAddress();
+    }, [contract, strategyAddress]);
 
     return (
         <Card width={'auto'} mt={25} mx={'auto'} px={[3, 3, 4]}>
