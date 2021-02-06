@@ -12,10 +12,22 @@ const NewUserContractForm = ({
     const [inputValue, setInputValue] = useState('');
     const [selectValue, setSelectValue] = useState('');
     const [strategies, setStrategies] = useState([]);
+    const [inputStrategy, setInputStrategy] = useState('');
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const target = e.target as HTMLInputElement;
         setInputValue(target.value);
+        if (utils.isAddress(target.value)) {
+            validateInput(e);
+        } else {
+            const parent = e.target.parentNode as Element;
+            parent.classList.remove('was-validated');
+        }
+    };
+
+    const handleInputStrategy = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const target = e.target as HTMLInputElement;
+        setInputStrategy(target.value);
         if (utils.isAddress(target.value)) {
             validateInput(e);
         } else {
@@ -34,19 +46,22 @@ const NewUserContractForm = ({
         parent.classList.add('was-validated');
     };
 
-    const validateForm = () =>
-        setValidated(utils.isAddress(inputValue) && selectValue.length > 0);
+    const validateForm = () => {
+        setValidated(
+            utils.isAddress(inputValue) && utils.isAddress(inputStrategy),
+        );
+    };
 
     useEffect(() => {
         validateForm();
-    }, [inputValue, selectValue]);
+    }, [inputValue, selectValue, inputStrategy]);
 
     const handleSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault();
         // Call parent prop
         handleFormSubmit({
             followedAddr: inputValue,
-            strategyName: selectValue,
+            strategyName: inputStrategy,
         } as NewContractForm);
     };
 
@@ -94,7 +109,15 @@ const NewUserContractForm = ({
                                 validated={validated}
                                 width={1}
                             >
-                                <Select
+                                <Input
+                                    type="text"
+                                    required={true}
+                                    placeholder="i.e. the strategy address"
+                                    onChange={handleInputStrategy}
+                                    value={inputStrategy}
+                                    width={1}
+                                />
+                                {/* <Select
                                     options={[
                                         { value: '', label: '' },
                                         ...strategies.map(
@@ -113,7 +136,7 @@ const NewUserContractForm = ({
                                     required
                                     width={1}
                                     selected={'aave'}
-                                />
+                                /> */}
                             </Field>
                         </Box>
                     </Flex>
