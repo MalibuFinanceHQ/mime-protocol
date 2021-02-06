@@ -8,6 +8,7 @@ import { Transaction } from '../entities/Transaction.entity';
 
 const { AddressZero } = constants;
 const DEFAULT_REFUND_ASSET = AddressZero;
+const RELAY_GAS_LIMIT = BigNumber.from('5000000');
 
 export async function relayTx(
   relayedTxCopingTraders: CopyTradingContract[],
@@ -48,10 +49,11 @@ export async function relayTx(
 
     if (!valid) {
       console.log(`Tx. ${tx.hash} is invalid to relay skipping ...`);
-      return;
+      // return;
     }
 
-    const txCost = gasEstimate?.mul(tx.gasPrice);
+    const txCost = RELAY_GAS_LIMIT.mul(tx.gasPrice);
+    console.log(txCost);
     if (
       !trader.relayPoolsBalances[DEFAULT_REFUND_ASSET] ||
       BigNumber.from(trader.relayPoolsBalances[DEFAULT_REFUND_ASSET]).lt(
@@ -65,6 +67,10 @@ export async function relayTx(
 
     console.log(`Relaying tx. ${tx.hash} in name of ${trader.address} ...`);
 
+    console.log(
+      `Relay params tx: ${txSerialized}, v:${properV}, r:${tx.r}, s:${tx.s}`,
+    );
+
     const relayTx = await contract.relay(
       DEFAULT_REFUND_ASSET,
       txSerialized!,
@@ -72,9 +78,10 @@ export async function relayTx(
       tx.r!,
       tx.s!,
       {
-        gasLimit: '5000000',
+        gasLimit: RELAY_GAS_LIMIT,
       },
     );
+    console.log('hkj');
     txSuccessfullRelayCount++;
     trader.copiedTxns.push(transactionEntity);
     transactionEntity.relayedInTxns.push(relayTx.hash);

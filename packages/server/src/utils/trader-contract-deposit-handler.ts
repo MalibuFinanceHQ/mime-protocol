@@ -66,4 +66,10 @@ export async function traderContractDepositHandler(
   }
 
   await copyTradingContract.save();
+
+  console.log(
+    `Contract: ${copyTradingContract.address} deposited ${topUp.amount} of ${
+      topUp.asset
+    } to ${topUp.targetPool ? 'operations' : 'relay'} pool`,
+  );
 }

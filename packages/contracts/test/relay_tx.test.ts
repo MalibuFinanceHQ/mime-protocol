@@ -164,6 +164,7 @@ describe('Relay Transaction: test', function () {
         chainId: approveTx.chainId,
       };
       const baseSerialized = serializeTransaction(baseTx);
+      console.log('sig: ', approveTx.r, approveTx.s);
       const txPreimage = keccak256(baseSerialized);
 
       console.log('expected address', await followedTrader.getAddress());

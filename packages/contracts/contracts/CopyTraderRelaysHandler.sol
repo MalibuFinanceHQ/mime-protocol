@@ -11,8 +11,6 @@ import "./utils/AbiUtils.sol";
 import "./interfaces/ITradingStrategy.sol";
 import "./interfaces/IABIManipulator.sol";
 
-import "hardhat/console.sol";
-
 abstract contract CopyTraderRelaysHandler {
     using SafeMath for uint256;
 
@@ -70,7 +68,6 @@ abstract contract CopyTraderRelaysHandler {
     ) internal view returns (bool, bytes32) {
         bytes32 txHash = keccak256(transaction_);
         address signer = ECDSA.recover(txHash, v_, r_, s_);
-        console.log("Onchain recovered address: %s", signer);
         return (signer_ == signer, txHash);
     }
 
@@ -88,8 +85,6 @@ abstract contract CopyTraderRelaysHandler {
             "CopyTrader:_relay, a transaction has been relayed during current block"
         );
 
-        console.log("Onchain expected address: %s", correctSigner_);
-
         (bool signatureOk, bytes32 txHash) =
             _isRLPSignatureCorrect(
                 transaction_,
@@ -98,8 +93,6 @@ abstract contract CopyTraderRelaysHandler {
                 txSigS_,
                 correctSigner_
             );
-
-        console.logBytes32(txHash);
 
         require(
             signatureOk && !relayedTxns[txHash],
