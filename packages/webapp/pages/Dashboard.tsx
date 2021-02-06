@@ -1,6 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Box, Modal, Button, Card, Heading, Loader } from 'rimble-ui';
-import { CopyTradingContract, NewContractForm } from '../utils/types';
+import {
+    CopyTradingContract,
+    NewContractForm,
+    StrategyEntity,
+} from '../utils/types';
 import NewUserContractForm from '../components/NewUserContractForm';
 import { createCopyTradingContract } from '../utils/contract-creation';
 import Context from '../utils/context';
@@ -11,6 +15,7 @@ export default function Dashboard(): JSX.Element {
 
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [strategies, setStrategies] = useState([]);
 
     const closeModal = (e: React.SyntheticEvent) => {
         e.preventDefault();
@@ -50,9 +55,21 @@ export default function Dashboard(): JSX.Element {
         );
     };
 
+    const fetchStrategies = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/strategies`,
+        );
+        // TODO: handle errors
+        if (!response.ok) return;
+        const strategies: StrategyEntity[] = await response.json();
+        setStrategies(strategies);
+        console.log(`Fetched strategies`, strategies);
+    };
+
     useEffect(() => {
         let _timeout: NodeJS.Timeout;
         if (ctxt.account) {
+            fetchStrategies();
             fetchCopyTradingContracts();
             _timeout = setInterval(fetchCopyTradingContracts, 30 * 1000);
         }
@@ -87,6 +104,7 @@ export default function Dashboard(): JSX.Element {
                                 <NewUserContractForm
                                     handleFormSubmit={handleSubmit}
                                     handleClose={closeModal}
+                                    strategies={strategies}
                                 />
                             ) : (
                                 <Loader mx="auto" mt={25} size={80} />

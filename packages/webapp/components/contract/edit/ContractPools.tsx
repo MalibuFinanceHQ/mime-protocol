@@ -12,6 +12,12 @@ const ASSETS_LIST = [
         balance: 4.25,
         poolType: PoolType.OPERATIONS,
     } as AssetRow,
+    {
+        asset: 'Dai',
+        assetAddress: '0x6354B18b6ED52FBdC8abcD3fFbc65565cbfa8364',
+        balance: 5,
+        poolType: PoolType.OPERATIONS,
+    } as AssetRow,
 ] as AssetRow[];
 
 const ContractPools = ({ contract }: InferProps<typeof props>): JSX.Element => {

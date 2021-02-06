@@ -31,3 +31,9 @@ export type AssetAction = {
     actionName: string;
     ar: AssetRow;
 };
+
+export type StrategyEntity = {
+    address: string;
+    description?: string;
+    name?: string;
+};
