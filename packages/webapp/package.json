@@ -1,0 +1,38 @@
+{
+    "name": "webapp",
+    "version": "0.1.0",
+    "private": false,
+    "license": "MIT",
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start"
+    },
+    "dependencies": {
+        "@metamask/detect-provider": "^1.2.0",
+        "@rimble/connection-banner": "^1.2.3",
+        "@rimble/network-indicator": "^1.2.3",
+        "@types/prop-types": "^15.7.3",
+        "ethers": "^5.0.26",
+        "next": "10.0.6",
+        "prop-types": "^15.7.2",
+        "react": "17.0.1",
+        "react-dom": "17.0.1",
+        "rimble-ui": "^0.14.0",
+        "styled-components": "4.4.1"
+    },
+    "devDependencies": {
+        "@types/node": "^14.14.22",
+        "@types/react": "^17.0.0",
+        "@typescript-eslint/eslint-plugin": "^4.14.1",
+        "@typescript-eslint/parser": "^4.14.1",
+        "eslint": "^7.19.0",
+        "eslint-config-prettier": "^7.2.0",
+        "eslint-plugin-import": "^2.22.1",
+        "eslint-plugin-jsx-a11y": "^6.4.1",
+        "eslint-plugin-prettier": "^3.3.1",
+        "eslint-plugin-react": "^7.22.0",
+        "eslint-plugin-react-hooks": "^4.2.0",
+        "prettier": "^2.2.1"
+    }
+}

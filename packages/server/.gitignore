@@ -1,0 +1,4 @@
+node_modules
+.env*
+postgres-data
+postgres-data-e2e

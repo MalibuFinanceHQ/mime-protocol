@@ -1,0 +1,50 @@
+version: '3'
+services:
+  app:
+    build: .
+    depends_on:
+      - postgres
+    ports:
+      - '9099:3000'
+    networks:
+      - netwr
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - .env
+  postgres:
+    image: postgres
+    ports:
+      - '5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: cle_si_vous_plait
+      PGDATA: /data/postgres
+      POSTGRES_DB: shreks-swamp
+    networks:
+      - netwr
+    volumes:
+      - './postgres-data:/data/postgres'
+  ganache:
+    image: trufflesuite/ganache-cli:latest
+    ports:
+      - '8546:8545'
+    volumes:
+      - ./ganache_data:/ganache_data
+    entrypoint:
+      - node
+      - /app/ganache-core.docker.cli.js
+      - --deterministic
+      - --db=/ganache_data
+      - --mnemonic
+      - 'minimum symptom minute gloom tragic situate silver mechanic salad amused elite beef'
+      - --networkId
+      - '5777'
+      - --hostname
+      - '0.0.0.0'
+      - --debug
+    networks:
+      - netwr
+networks:
+  netwr:
