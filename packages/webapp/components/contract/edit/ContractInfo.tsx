@@ -5,28 +5,29 @@ import { Loader, Box, Card, Heading, Text, EthAddress, Icon } from 'rimble-ui';
 import ContractEditForm from './Form';
 import RelayedTxns from './RelayedTxns';
 import { CopyTrader } from '../../../typechain';
+import { TransactionRow } from '../../../utils/types';
 
-// Mock data
-const TXNS_LIST = [
-    {
-        hash:
-            '0x9e88919ccb4f6db5a33c8c10cedd7f034332a348563ed0af9882c16b68f8c863',
-        to: '0x00',
-        created: 'Today',
-    },
-    {
-        hash:
-            '0x9e88919ccb4f6db5a33c8c10cedd7f034332a348563ed0af9882c16b68f8c864',
-        to: '0x01',
-        created: 'Yesterday',
-    },
-    {
-        hash:
-            '0x9e88919ccb4f6db5a33c8c10cedd7f034332a348563ed0af9882c16b68f8c865',
-        to: '0x02',
-        created: '2 days ago',
-    },
-];
+// // Mock data
+// const TXNS_LIST = [
+//     {
+//         hash:
+//             '0x9e88919ccb4f6db5a33c8c10cedd7f034332a348563ed0af9882c16b68f8c863',
+//         to: '0x00',
+//         created: 'Today',
+//     },
+//     {
+//         hash:
+//             '0x9e88919ccb4f6db5a33c8c10cedd7f034332a348563ed0af9882c16b68f8c864',
+//         to: '0x01',
+//         created: 'Yesterday',
+//     },
+//     {
+//         hash:
+//             '0x9e88919ccb4f6db5a33c8c10cedd7f034332a348563ed0af9882c16b68f8c865',
+//         to: '0x02',
+//         created: '2 days ago',
+//     },
+// ];
 
 const ContractInfo = ({
     contract,
@@ -38,12 +39,31 @@ const ContractInfo = ({
 
     const fetchStrategyAddress = async () => {
         const addr = await (contract as CopyTrader).tradingStrategy();
-        console.log('contract strategy', addr);
+        // console.log('contract strategy', addr);
         setStrategyAddress(addr);
+    };
+
+    const [relayedTxns, setRelayedTxns] = useState([]);
+
+    const fetchRelayedTxns = async () => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/relayed-txns?address=${address}`,
+        );
+        // TODO: handle errors
+        if (!response.ok) return;
+        const txns: TransactionRow[] = await response.json();
+        console.log(`Fetched relayed txns for contract ${address}`, txns);
+        setRelayedTxns(txns);
     };
 
     useEffect(() => {
         if (contract && !strategyAddress) fetchStrategyAddress();
+        let timeout: NodeJS.Timeout;
+        if (contract) {
+            fetchRelayedTxns();
+            timeout = setInterval(fetchRelayedTxns, 3000);
+        }
+        return () => clearInterval(timeout);
     }, [contract, strategyAddress]);
 
     return (
@@ -67,7 +87,7 @@ const ContractInfo = ({
                         observedAddres={observedAddress}
                         updateObservedAddress={updateObservedAddress}
                     />
-                    <RelayedTxns txnsList={TXNS_LIST} />
+                    <RelayedTxns txnsList={relayedTxns} />
                 </Box>
             ) : (
                 <Box>

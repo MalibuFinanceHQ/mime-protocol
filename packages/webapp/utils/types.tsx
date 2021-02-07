@@ -10,9 +10,8 @@ export type CopyTradingContract = {
 };
 
 export type TransactionRow = {
-    hash: string;
-    to: string;
-    created: string;
+    txHash: string;
+    baseTxHash: string;
 };
 
 export enum PoolType {

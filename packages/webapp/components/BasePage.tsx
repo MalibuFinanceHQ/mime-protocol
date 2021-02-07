@@ -69,12 +69,12 @@ export default function BasePage({
     };
 
     useEffect(() => {
-        // let _timeout: NodeJS.Timeout;
+        let _timeout: NodeJS.Timeout;
         if (ctxt.account) {
             fetchCopyTradingContracts();
-            // _timeout = setInterval(fetchCopyTradingContracts, 30 * 1000);
+            _timeout = setInterval(fetchCopyTradingContracts, 3 * 1000);
         } else initProvider();
-        // return () => clearInterval(_timeout);
+        return () => clearInterval(_timeout);
     }, [ctxt.account]);
 
     return (
