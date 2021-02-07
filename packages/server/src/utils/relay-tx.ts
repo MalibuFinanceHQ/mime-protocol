@@ -1,11 +1,10 @@
-import { Signer, providers, constants, utils, BigNumber } from 'ethers';
+import { Signer, providers, constants, BigNumber } from 'ethers';
 import { CopyTradingContract } from '../entities/CopyTradingContract.entity';
 import { CopyTrader__factory } from '../../../contracts/typechain';
 import { validateRelayTx } from './validate-relay-tx';
 import { getManager } from 'typeorm';
 import { FollowedTrader } from '../entities/FollowedTrader.entity';
 import { CopiedTransaction } from '../entities/CopiedTransaction.entity';
-import { formatEther } from 'ethers/lib/utils';
 import { WrappedNodeRedisClient } from 'handy-redis';
 import { TransactionCopy } from '../entities/TransactionCopy.entity';
 
@@ -35,10 +34,14 @@ export async function relayTx(
 
   let txSuccessfullRelayCount = 0;
 
-  relayedTxCopingTraders.forEach(async (trader) => {
+  const nonce = await redis.get('wallet-nonce');
+  let failedRelays = 0;
+
+  for (let index = 0; index < relayedTxCopingTraders.length; index++) {
+    const trader = relayedTxCopingTraders[index];
     const contract = CopyTrader__factory.connect(trader.address, signer);
 
-    const { valid, gasEstimate, txSerialized, properV } = await validateRelayTx(
+    const { valid, gasEstimate, txSerialized, sig } = await validateRelayTx(
       contract,
       tx,
       DEFAULT_REFUND_ASSET,
@@ -47,10 +50,14 @@ export async function relayTx(
 
     if (!valid) {
       console.log(`Tx. ${tx.hash} is invalid to relay skipping ...`);
+      ++failedRelays;
       return;
     }
 
-    if (!trader.relayPoolsBalances[DEFAULT_REFUND_ASSET]) return;
+    if (!trader.relayPoolsBalances[DEFAULT_REFUND_ASSET]) {
+      ++failedRelays;
+      return;
+    }
 
     const txCost = RELAY_GAS_LIMIT.mul(tx.gasPrice);
     if (
@@ -65,34 +72,32 @@ export async function relayTx(
       console.log(
         `Trader ${trader.address} couldn't afford to refund relay of tx. ${tx.hash}`,
       );
+      ++failedRelays;
+      return;
     }
 
     console.log(`Relaying tx. ${tx.hash} in name of ${trader.address} ...`);
 
-    const nonce = await redis.get('wallet-nonce');
-
-    console.log(`Relaying current nonce ${nonce}`);
-
     const relayTx = await contract.relay(
       DEFAULT_REFUND_ASSET,
       txSerialized!,
-      properV!,
-      tx.r!,
-      tx.s!,
+      sig?.v!,
+      sig?.r!,
+      sig?.s!,
       {
         gasLimit: RELAY_GAS_LIMIT,
-        nonce: Number(nonce),
+        nonce: Number(nonce) + index - failedRelays,
       },
     );
+
+    await redis.incr('wallet-nonce');
 
     const copy = new TransactionCopy();
     copy.txHash = relayTx.hash;
     copy.base = transactionEntity;
     copy.copyExecutor = trader;
 
-    await redis.incr('wallet-nonce');
-
-    txSuccessfullRelayCount++;
+    ++txSuccessfullRelayCount;
     console.log(
       `Tx. ${tx.hash} relayed in name of ${trader.address} txHash:${relayTx.hash}`,
     );
@@ -100,7 +105,7 @@ export async function relayTx(
     await copy.save();
 
     // TODO update trader balances in relay pool.
-  });
+  }
 
   if (txSuccessfullRelayCount > 0) {
     followedTrader.copiedTxns.push(transactionEntity);

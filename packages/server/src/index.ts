@@ -14,9 +14,9 @@ import { TradersFactory__factory } from '../../contracts/typechain';
 import { copyTradersIndexer } from './indexers/copy-traders-creation.indexer';
 
 import { AppRoutes } from './api/routes';
-import { filterAndQueueRelayableTxnsInBlock } from './crons/queue-txns-to-relay';
 import { relayQueuedTransactions } from './crons/relay-queued-transactions';
 import { onNewBlockHandler } from './crons/on-new-block-handler';
+import connection from './utils/connection';
 
 createConnection().then(async () => {
   const app = express();
@@ -73,4 +73,5 @@ createConnection().then(async () => {
   app.listen(port, () => {
     console.log(`Server started`);
   });
+  process.on('exit', () => connection.close());
 });

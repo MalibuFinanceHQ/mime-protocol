@@ -12,7 +12,7 @@ export async function validateRelayTx(
   valid: boolean;
   gasEstimate?: BigNumber;
   txSerialized?: string;
-  properV?: number;
+  sig?: { v: number; r: string; s: string };
 }> {
   const txSerialized = utils.serializeTransaction({
     to: tx.to,
@@ -41,20 +41,27 @@ export async function validateRelayTx(
     return { valid: false };
   }
 
+  const sig = {
+    v: properV,
+    r: tx.r?.length === 66 ? tx.r : `0x0`.concat(tx.r!.slice(2)),
+    s: tx.s?.length === 66 ? tx.s : `0x0`.concat(tx.s!.slice(2)),
+  };
+
   return contractInstance.estimateGas
-    .relay(refundAsset, txSerialized, properV, tx.r!, tx.s!)
+    .relay(refundAsset, txSerialized, sig.v, sig.r, sig.s)
     .then((gasEstimate) => ({
       valid: true,
       txSerialized,
       gasEstimate,
       properV,
+      sig,
     }))
     .catch((e) => {
       console.log(e);
       return {
         valid: false,
         txSerialized,
-        properV,
+        sig,
       };
     });
 }
