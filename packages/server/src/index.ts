@@ -49,7 +49,7 @@ createConnection().then(async () => {
 
   // provider.on('pending', (tx) => console.log(tx));
 
-  cron.schedule(process.env.CRON_SCHEDULE || '*/30 * * * * * *', () =>
+  cron.schedule(process.env.CRON_SCHEDULE || '*/15 * * * * * *', () =>
     relayQueuedTransactions(wallet, redis),
   );
 
