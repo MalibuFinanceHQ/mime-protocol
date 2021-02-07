@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react';
 import PropTypes, { InferProps } from 'prop-types';
-import { BigNumber } from 'ethers';
 import { Table, Icon, Flex, Button, Link, Tooltip } from 'rimble-ui';
 import ContractPoolsTableModal from './ContractPoolsTableModal';
 import { AssetRow, AssetAction, PoolType } from '../../../utils/types';
@@ -23,43 +22,42 @@ const ContractPoolsTable = ({
 
     const [isOpen, setIsOpen] = useState(false);
     const [curAction, setCurAction] = useState(null);
-    console.log('contract', contract?.address);
     const ctxt = useContext(Context);
     console.log(ctxt.contracts);
-    let assets = assetsList;
-    if (contract?.address) {
-        assets = assetsList.map((asset: AssetRow) => {
+
+    const normalizeAssetsList = (list: AssetRow[]) =>
+        list.map((a: AssetRow) => {
+            if (!contract?.address) return a;
             let balance = 0;
+            let hexBalance = 0;
+            // eslint-disable-next-line
             const c = ctxt.contracts.find(
-                (c) => c.address === contract.address,
+                ({ address }) => address === contract.address,
             );
-            if (!c) {
-                return {
-                    ...asset,
-                    balance,
-                };
-            }
-            let hexBalance: string | undefined;
-            if (asset.poolType === PoolType.OPERATIONS) {
+            if (!c) return a;
+            if (a.poolType === PoolType.OPERATIONS) {
                 // @ts-ignore
-                hexBalance = c.operationsPoolsBalances[asset.assetAddress];
-                balance = hexBalance
-                    ? BigNumber.from(hexBalance).toNumber()
+                hexBalance = c.operationsPoolsBalances.hasOwnProperty(
+                    a.assetAddress,
+                )
+                    ? // @ts-ignore
+                      c.operationsPoolsBalances[a.assetAddress]
                     : 0;
-            } else if (asset.poolType === PoolType.RELAY) {
+            } else if (a.poolType === PoolType.RELAY) {
                 // @ts-ignore
-                hexBalance = c.relayPoolsBalances[asset.assetAddress];
-                balance = hexBalance
-                    ? BigNumber.from(hexBalance).toNumber()
+                hexBalance = c.relayPoolsBalances.hasOwnProperty(a.assetAddress)
+                    ? // @ts-ignore
+                      c.relayPoolsBalances[a.assetAddress]
                     : 0;
             }
+            balance = hexBalance ? parseInt(hexBalance.toString(), 16) : 0;
             return {
-                ...asset,
+                ...a,
                 balance,
             };
         });
-    }
 
+    const assets = normalizeAssetsList(assetsList as AssetRow[]);
     return (
         <>
             <Table mt={25}>
@@ -74,7 +72,7 @@ const ContractPoolsTable = ({
                 </thead>
                 <tbody>
                     {(assets as AssetRow[]).map((ar: AssetRow) => (
-                        <tr key={ar.assetAddress}>
+                        <tr key={`${ar.poolType}-${ar.assetAddress}`}>
                             <td>
                                 <Tooltip
                                     message={ar.asset}

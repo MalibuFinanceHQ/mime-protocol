@@ -80,7 +80,6 @@ const TopUp = ({
             ];
             console.log('poolType', action.ar);
             const chargedPools = [selectValue === 'RELAY' ? 0 : 1];
-            console.log('contract addrrrr', contract.address);
             console.log('charges', charges);
             console.log('chargedPools', chargedPools);
             console.log('parsed amount in wei', parseEther(inputValue));

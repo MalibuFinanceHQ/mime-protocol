@@ -9,14 +9,26 @@ const ASSETS_LIST = [
     {
         asset: 'Eth',
         assetAddress: ethers.constants.AddressZero,
-        balance: 4.25,
+        balance: 0,
+        poolType: PoolType.OPERATIONS,
+    } as AssetRow,
+    {
+        asset: 'Eth',
+        assetAddress: ethers.constants.AddressZero,
+        balance: 0,
+        poolType: PoolType.RELAY,
+    } as AssetRow,
+    {
+        asset: 'Dai',
+        assetAddress: '0x6354B18b6ED52FBdC8abcD3fFbc65565cbfa8364',
+        balance: 0,
         poolType: PoolType.OPERATIONS,
     } as AssetRow,
     {
         asset: 'Dai',
         assetAddress: '0x6354B18b6ED52FBdC8abcD3fFbc65565cbfa8364',
-        balance: 5,
-        poolType: PoolType.OPERATIONS,
+        balance: 0,
+        poolType: PoolType.RELAY,
     } as AssetRow,
 ] as AssetRow[];
 

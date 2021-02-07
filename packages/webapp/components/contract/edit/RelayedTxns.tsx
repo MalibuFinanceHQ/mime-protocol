@@ -13,37 +13,34 @@ const RelayedTxns = ({
                 <thead>
                     <tr>
                         <th>Transaction hash</th>
-                        <th>To</th>
-                        <th>Date</th>
+                        <th>Base transaction hash</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {txnsList.map(({ hash, to, created }: TransactionRow) => (
-                        <tr key={hash}>
+                    {txnsList.map(({ txHash, baseTxHash }: TransactionRow) => (
+                        <tr key={txHash}>
                             <td>
                                 <Link
-                                    href={`https://kovan.etherscan.io/tx/${hash}`}
+                                    href={`https://kovan.etherscan.io/tx/${txHash}`}
                                     target="_blank"
                                     rel="noreferrer"
                                     title="View on Etherscan"
                                     style={{ textDecoration: 'underline' }}
                                 >
-                                    {hash}
+                                    {txHash}
                                 </Link>
                             </td>
                             <td>
                                 <Link
-                                    href={`https://kovan.etherscan.io/address/${to}`}
+                                    href={`https://kovan.etherscan.io/tx/${baseTxHash}`}
                                     target="_blank"
                                     rel="noreferrer"
                                     title="View on Etherscan"
                                     style={{ textDecoration: 'underline' }}
                                 >
-                                    {to}
+                                    {baseTxHash}
                                 </Link>
                             </td>
-                            <td>{created}</td>
-                            <td></td>
                         </tr>
                     ))}
                 </tbody>
