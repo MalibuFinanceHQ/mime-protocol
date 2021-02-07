@@ -1,7 +1,5 @@
 import {
   Entity,
-  JoinColumn,
-  OneToMany,
   BaseEntity,
   CreateDateColumn,
   DeleteDateColumn,

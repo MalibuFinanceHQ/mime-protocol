@@ -185,6 +185,12 @@ describe('Relay Transaction: test', function () {
       await copyTrader
         .connect(deployer)
         .relay(AddressZero, baseSerialized, v, approveTx.r!, approveTx.s!);
+
+      const allowanceGivenByTrader = await mockDAI.allowance(
+        copyTrader.address,
+        mockLendingPool.address,
+      );
+      console.log(allowanceGivenByTrader.toHexString());
     },
   );
 });

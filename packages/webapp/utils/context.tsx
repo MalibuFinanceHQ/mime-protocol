@@ -12,7 +12,7 @@ export type MimeContext = {
 
 export const defaultCtxt: MimeContext = {
     currentNetworkId: null,
-    requiredNetworkId: 42, // Kovan testnet
+    requiredNetworkId: 42, // hardhat testnet 42
     provider: null,
     account: null,
     contracts: [],

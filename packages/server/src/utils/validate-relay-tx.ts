@@ -2,6 +2,7 @@ import { BigNumber, providers, utils } from 'ethers';
 import { CopyTrader } from '../../../contracts/typechain';
 import { getTxV } from './get-proper-v';
 
+// TODO fix gas estimator + parse signatures when compressed.
 export async function validateRelayTx(
   contractInstance: CopyTrader,
   tx: providers.TransactionResponse,
@@ -49,6 +50,7 @@ export async function validateRelayTx(
       properV,
     }))
     .catch((e) => {
+      console.log(e);
       return {
         valid: false,
         txSerialized,

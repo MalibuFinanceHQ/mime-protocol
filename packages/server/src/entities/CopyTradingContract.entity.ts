@@ -5,7 +5,6 @@ import {
   DeleteDateColumn,
   Entity,
   OneToMany,
-  ManyToMany,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
@@ -14,9 +13,10 @@ import { FollowedTrader } from './FollowedTrader.entity';
 import { PoolTopUp } from './PoolTopUp.entity';
 import { Strategy } from './Strategy.entity';
 import { User } from './User.entity';
-import { Transaction } from './Transaction.entity';
+import { CopiedTransaction } from './CopiedTransaction.entity';
 import { BigNumberish } from 'ethers';
 import { PoolWithdraw } from './PoolWithdraw.entity';
+import { TransactionCopy } from './TransactionCopy.entity';
 
 // @dev CopyTradingContract represents an EOA following some other trader.s's strategy.ies.
 @Entity()
@@ -70,6 +70,8 @@ export class CopyTradingContract extends BaseEntity {
   )
   public poolWithdrawals: PoolWithdraw[];
 
-  @ManyToMany(() => Transaction, (transaction) => transaction.copiedBy)
-  public copiedTxns: Transaction[];
+  @OneToMany(() => TransactionCopy, (copy) => copy.copyExecutor, {
+    cascade: true,
+  })
+  public copiedTxns: TransactionCopy[];
 }

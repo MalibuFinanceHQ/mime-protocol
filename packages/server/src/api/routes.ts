@@ -1,4 +1,5 @@
 import { getAvailableStrategies } from './GetAvailableStrategies';
+import { getRelayedTxns } from './GetRelayedTxns';
 import { getUserCopyTraders } from './GetUserCopyTraders';
 
 /**
@@ -14,5 +15,10 @@ export const AppRoutes = [
     path: '/strategies',
     method: 'get',
     action: getAvailableStrategies,
+  },
+  {
+    path: '/relayed-txns',
+    method: 'get',
+    action: getRelayedTxns,
   },
 ];

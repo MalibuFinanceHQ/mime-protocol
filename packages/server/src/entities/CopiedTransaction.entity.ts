@@ -9,12 +9,14 @@ import {
   DeleteDateColumn,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { CopyTradingContract } from './CopyTradingContract.entity';
 import { FollowedTrader } from './FollowedTrader.entity';
+import { TransactionCopy } from './TransactionCopy.entity';
 
 @Entity()
-export class Transaction extends BaseEntity {
+export class CopiedTransaction extends BaseEntity {
   @PrimaryColumn({ type: 'varchar' })
   public hash: string;
 
@@ -32,8 +34,8 @@ export class Transaction extends BaseEntity {
   @DeleteDateColumn()
   public deletedAt: Date;
 
-  @Column({ type: 'varchar', default: () => 'array[]::varchar[]', array: true })
-  public relayedInTxns: string[];
+  @OneToMany((type) => TransactionCopy, (copy) => copy.base)
+  public copies: TransactionCopy[];
 
   // Relations
 

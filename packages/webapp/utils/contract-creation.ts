@@ -44,7 +44,7 @@ export const createCopyTradingContract = async (
     const tx = await factory.createNew(
         followedAddr,
         0,
-        '0xEE8EF3127A34bdb689a58B07354852daBb7C9c5d',
+        '0xFC170a1907dB0CEDc39000a9755D13E26525CB3a',
         // tradingStrategy.address,
     );
     return tx;

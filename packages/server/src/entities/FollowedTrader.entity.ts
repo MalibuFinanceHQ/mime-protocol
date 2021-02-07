@@ -9,7 +9,7 @@ import {
   Column,
 } from 'typeorm';
 import { CopyTradingContract } from './CopyTradingContract.entity';
-import { Transaction } from './Transaction.entity';
+import { CopiedTransaction } from './CopiedTransaction.entity';
 
 @Entity()
 export class FollowedTrader extends BaseEntity {
@@ -39,6 +39,6 @@ export class FollowedTrader extends BaseEntity {
   )
   public followersContracts: CopyTradingContract[];
 
-  @OneToMany(() => Transaction, (transaction) => transaction.copiedFrom)
-  public copiedTxns: Transaction[];
+  @OneToMany(() => CopiedTransaction, (transaction) => transaction.copiedFrom)
+  public copiedTxns: CopiedTransaction[];
 }

@@ -1,6 +1,6 @@
 import { Signer, providers } from 'ethers';
 import { WrappedNodeRedisClient } from 'handy-redis';
-import { getConnection } from 'typeorm';
+import { getConnection, LessThanOrEqual } from 'typeorm';
 import { CopyTradingContract } from '../entities/CopyTradingContract.entity';
 import { relayTx } from '../utils/relay-tx';
 
@@ -27,15 +27,13 @@ export async function relayQueuedTransactions(
     }
     const tx = JSON.parse(txString) as providers.TransactionResponse;
 
-    const copyTraders = await copyTradersRepository
-      .createQueryBuilder('entity')
-      .leftJoinAndSelect('entity.copiedTxns', 'copiedTxns')
-      .leftJoinAndSelect('entity.followedTrader', 'followedTrader')
-      .where('followedTrader.address = :from', {
-        from: tx.from.toLocaleLowerCase(),
-      })
-      .andWhere('entity.relaySinceNonce <= :nonce', { nonce: tx.nonce })
-      .getMany();
+    const copyTraders = await copyTradersRepository.find({
+      relations: ['copiedTxns', 'followedTrader'],
+      where: {
+        followedTrader: { address: tx.from.toLocaleLowerCase() },
+        relaySinceNonce: LessThanOrEqual(tx.nonce),
+      },
+    });
 
     relayedTxCopingTraders[txHash] = copyTraders;
 
