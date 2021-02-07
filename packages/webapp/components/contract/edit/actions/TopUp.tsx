@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes, { InferProps } from 'prop-types';
 import { parseEther } from 'ethers/lib/utils';
 import {
@@ -11,8 +11,10 @@ import {
     Select,
     ToastMessage,
 } from 'rimble-ui';
-import { CopyTrader } from '../../../../typechain';
+import { CopyTrader, MockDAI, MockDAI__factory } from '../../../../typechain';
 import { AssetAction } from '../../../../utils/types';
+import { ethers } from 'ethers';
+import Context from '../../../../utils/context';
 
 const TopUp = ({
     curAction,
@@ -25,6 +27,7 @@ const TopUp = ({
     const [txState, setTxState] = useState('none');
 
     const [validated, setValidated] = useState(false);
+    const ctxt = useContext(Context);
 
     const validateInput = (e: React.ChangeEvent<HTMLElement>) => {
         const parent = e.target.parentNode as Element;
@@ -69,20 +72,48 @@ const TopUp = ({
     const handleSubmit = async (e: React.SyntheticEvent) => {
         try {
             e.preventDefault();
-            console.log('Proceeding deposit w/', inputValue, selectValue);
-            // console.log('contract', contract);
             const action = curAction as AssetAction;
+
+            // Set asset allowance if needed
+            if (action.ar.assetAddress !== ethers.constants.AddressZero) {
+                console.log('approving');
+
+                const signer = ctxt.provider.getSigner(ctxt.account);
+                const md = MockDAI__factory.connect(
+                    action.ar.assetAddress,
+                    signer,
+                );
+
+                const allowance = await md.allowance(
+                    ctxt.account,
+                    (contract as CopyTrader).address,
+                );
+                console.log('Current allowance', allowance);
+                if (allowance.eq(0)) {
+                    setTxState('pending');
+                    // MockDAI is used here but that's ERC-20 compliant really
+                    const receipt1 = await md.approve(
+                        (contract as CopyTrader).address,
+                        ethers.constants.MaxUint256,
+                    );
+                    await receipt1.wait();
+                    setTxState('complete');
+                }
+            }
+
+            // console.log('Proceeding deposit w/', inputValue, selectValue);
+            // console.log('contract', contract);
             const charges = [
                 {
                     asset: action.ar.assetAddress,
                     value: parseEther(inputValue),
                 },
             ];
-            console.log('poolType', action.ar);
+            // console.log('poolType', action.ar);
             const chargedPools = [selectValue === 'RELAY' ? 0 : 1];
-            console.log('charges', charges);
-            console.log('chargedPools', chargedPools);
-            console.log('parsed amount in wei', parseEther(inputValue));
+            // console.log('charges', charges);
+            // console.log('chargedPools', chargedPools);
+            // console.log('parsed amount in wei', parseEther(inputValue));
             setTxState('pending');
             const tx = await (contract as CopyTrader).chargePools(
                 charges,

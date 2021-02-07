@@ -132,7 +132,7 @@ const ContractEditForm = ({
                             },
                             {
                                 value:
-                                    '0x6354B18b6ED52FBdC8abcD3fFbc65565cbfa8364',
+                                    '0xff795577d9ac8bd7d90ee22b6c1703490b6512fd',
                                 label: 'Dai',
                             },
                         ]}
