@@ -51,12 +51,12 @@ export async function relayTx(
     if (!valid) {
       console.log(`Tx. ${tx.hash} is invalid to relay skipping ...`);
       ++failedRelays;
-      return;
+      continue;
     }
 
     if (!trader.relayPoolsBalances[DEFAULT_REFUND_ASSET]) {
       ++failedRelays;
-      return;
+      continue;
     }
 
     const txCost = RELAY_GAS_LIMIT.mul(tx.gasPrice);
@@ -73,7 +73,7 @@ export async function relayTx(
         `Trader ${trader.address} couldn't afford to refund relay of tx. ${tx.hash}`,
       );
       ++failedRelays;
-      return;
+      continue;
     }
 
     console.log(`Relaying tx. ${tx.hash} in name of ${trader.address} ...`);
