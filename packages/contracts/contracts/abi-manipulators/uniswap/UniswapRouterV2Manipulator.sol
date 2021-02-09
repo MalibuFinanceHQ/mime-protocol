@@ -18,19 +18,21 @@ contract UniswapRouterV2Manipulator is IABIManipulator {
         override
         returns (bytes memory)
     {
-        console.log(rawTxData.length);
 
-        bytes memory begin = rawTxData.slice(0, 4 + 2 * 32);
-        bytes memory to = rawTxData.slice(4 + 2 * 32, 32);
-        bytes memory end = rawTxData.slice(100, rawTxData.length - 100);
+        // bytes memory begin = rawTxData.slice(0, 4 + 2 * 32);
+        // bytes memory to = rawTxData.slice(4 + 2 * 32, 32);
+        // bytes memory end = rawTxData.slice(100, rawTxData.length - 100);
 
-        console.log(begin.length);
-        console.log(to.length);
-        console.log(end.length);
+        // console.log(begin.length);
+        // console.log(to.length);
+        // console.log(end.length);
 
-        bytes memory manipulated = begin.concat(abi.encode(ctx)).concat(end);
+        // bytes memory manipulated = begin.concat(abi.encode(ctx)).concat(end);
 
-        console.log(manipulated.length);
-        return manipulated;
+        bytes memory beforeTo = rawTxData.slice(0, 4 + (3 * 32));
+        bytes memory to = rawTxData.slice(4 + (3 * 32), 32);
+        bytes memory afterTo =
+            rawTxData.slice(4 + (3 * 32) + 32, rawTxData.length - 132);
+        return beforeTo.concat(abi.encode(ctx)).concat(afterTo);
     }
 }
