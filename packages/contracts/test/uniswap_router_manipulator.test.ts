@@ -1,9 +1,14 @@
 import { ethers } from 'hardhat';
-import { Signer, utils } from 'ethers';
+import { Signer, constants } from 'ethers';
+
+import { legos } from '@studydefi/money-legos';
+
+import { expect } from 'chai';
 
 import {
   UniswapRouterV2Manipulator__factory,
   UniswapRouterV2Manipulator,
+  MockUniswapV2Router__factory,
 } from '../typechain';
 
 describe('UniswapV2 router ABI manipulators: test', () => {
@@ -22,13 +27,28 @@ describe('UniswapV2 router ABI manipulators: test', () => {
   });
 
   it('Should make an ABI manipulation for UniswapV2 router: swapExactTokensForTokens', async () => {
-    const dataToManipulate =
-      '0x38ed173900000000000000000000000000000000000000000000001b1ae4d6e2ef500000000000000000000000000000000000000000000000000003631953ba7893e41900000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000f37fd9185bb5657d7e57ddea268fe56c2458f675000000000000000000000000000000000000000000000000000000005fea29a700000000000000000000000000000000000000000000000000000000000000030000000000000000000000006b175474e89094c44da98b954eedeac495271d0f000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000c011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f';
+    const encodedTx = await MockUniswapV2Router__factory.connect(
+      constants.AddressZero,
+      firstSigner,
+    ).populateTransaction.swapExactTokensForTokens(
+      constants.MaxUint256,
+      0,
+      [
+        legos.erc20.dai.address,
+        legos.erc20.wbtc.address,
+        legos.erc20.usdc.address,
+      ],
+      await accounts[2].getAddress(),
+      constants.MaxUint256,
+      { gasLimit: '67893883', gasPrice: '98783', nonce: 873 },
+    );
+    const data = encodedTx.data;
 
-    const call = await manipulator.manipulate(
-      dataToManipulate,
+    const manipulated = await manipulator.manipulate(
+      data!,
       await firstSigner.getAddress(),
     );
-    console.log(call);
+
+    expect(manipulated.length).to.be.equal(data?.length);
   });
 });
