@@ -9,6 +9,7 @@ import {
   TradingStrategy__factory,
   PricesLib__factory,
   MockDAI__factory,
+  UniswapRouterV2Manipulator__factory,
 } from '../typechain';
 
 import { constants } from 'ethers';
@@ -106,9 +107,21 @@ async function main() {
   nonce++;
   console.log(`Mock DAI deployed at ${mockDai.address}`);
 
+  // Deploy Uniswap Router V2 Manipulator.
+  const UniswapRouterV2Manipulator = (await ethers.getContractFactory(
+    'UniswapRouterV2Manipulator',
+  )) as UniswapRouterV2Manipulator__factory;
+  const uniswapRouterManipulator = await UniswapRouterV2Manipulator.deploy({
+    nonce,
+  });
+  nonce++;
+  console.log(
+    `UniswapV2 Router manipulator deployed at: ${uniswapRouterManipulator.address}`,
+  );
+
   // Mark Uniswap router as allowed DAI spender in ERC20.approve manipulator whitelist.
   await checkErc20ApproveManipulator.whitelist(
-    '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
+    '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Uniswap router address.
     { nonce },
   );
   nonce++;
@@ -118,6 +131,15 @@ async function main() {
     mockDai.address,
     '0x095ea7b3',
     checkErc20ApproveManipulator.address,
+    { nonce },
+  );
+  nonce++;
+
+  // Link Uniswap manipulator in strategy.
+  await tradingStrategy.setManipulator(
+    '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Uniswap router address.
+    '0x38ed1739', // swapExactTokensForTokens(...) method identifier.
+    uniswapRouterManipulator.address,
     { nonce },
   );
 }
